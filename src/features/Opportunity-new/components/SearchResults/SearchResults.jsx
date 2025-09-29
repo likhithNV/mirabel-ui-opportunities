@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import CardViewNew from './CardViewNew';
 import { EnhancedDataTable } from '@/shared/components/ui/advanced-table';
-import { EnhancedFilterBar } from '@/components/ui/EnhancedFilterBar';
+import { EnhancedFilterBar } from '@/shared/components/ui/EnhancedFilterBar';
 import { useSearchResults } from '../../hooks/useSearchResults';
 import { ExternalLink, MoreVertical, Edit, Check } from 'lucide-react';
 import { OpportunityStatsCards, ProposalStatsCards } from '../Stats';
 import { logger } from '../../../../components/shared/logger';
 import { useNavigate } from 'react-router-dom';
 import { getDefaultColumnOrder } from '../../hooks/helperData';
-import ViewsSidebar from '@/components/ui/views/ViewsSidebar';
-import { NewLoader } from '@/components/ui/NewLoader';
+import ViewsSidebar from '@/shared/components/ui/views/ViewsSidebar';
+import { NewLoader } from '@/shared/components/ui/NewLoader';
 import KanbanView from '../kanban/KanbanView';
 import { opportunityService } from '../../services/opportunityService';
 import { userServiceNew } from '../../services/userServiceNew';
@@ -25,7 +25,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/shared/components/ui/alert-dialog";
 
 const SearchResults = ({ searchParams, setShowResults, searchType = 'opportunities', setSearchParams }) => {
   const { data, loading, error, refetch } = useSearchResults(searchParams, searchType);

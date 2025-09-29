@@ -21,7 +21,7 @@ interface FloatingLabelSelectProps {
   options: SelectOption[]
   placeholder?: string
   required?: boolean
-  error?: string
+  error?: string | null
   disabled?: boolean
   className?: string
   modal?: boolean  // true = 36px height, false = 40px height

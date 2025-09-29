@@ -88,6 +88,7 @@ export interface OpportunityFormData {
     Name?: string;
   };
   customerId?: string;
+  source: string | null | undefined| "";
 }
 
 export interface ValidationErrors {
