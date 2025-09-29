@@ -3,7 +3,7 @@ import { opportunitiesReportService } from '../services/opportunitiesReportServi
 import { proposalsReportService } from '../services/proposalsReportService';
 import { searchPayloadBuilder } from '../services/searchPayloadBuilder';
 import { logger } from '../../../components/shared/logger';
-import { saveSearch } from '@/services/userService';
+import { userServiceNew } from '../services/userServiceNew';
 
 export const useSearchResults = (searchParams, searchType = 'opportunities') => {
   const [data, setData] = useState(null);
@@ -38,15 +38,22 @@ export const useSearchResults = (searchParams, searchType = 'opportunities') => 
           // For proposals, use the service's default payload for now
           // TODO: Update this to use searchPayloadBuilder when filter mapping is ready
           logger.info('useSearchResults: Using default proposals payload');
-          results = await service.getInitialData();
+          const apiPayload = searchPayloadBuilder.buildPayload(params, searchType);
+          logger.info('useSearchResults: Executing search with API payload:', apiPayload);
+          await userServiceNew.saveSearch({
+            apiPayload: apiPayload
+          });
+          results = await service.executeSearch(apiPayload);
         } else {
           logger.info('useSearchResults: Converting form data to API payload');
           // Convert form data to proper API payload
           const apiPayload = searchPayloadBuilder.buildPayload(params, searchType);
           logger.info('useSearchResults: Executing search with API payload:', apiPayload);
-          await saveSearch({
-            apiPayload: apiPayload
-          });
+          try {
+            await userServiceNew.saveSearch({ apiPayload });
+          } catch (e) {
+            logger.warn('useSearchResults: saveSearch failed, continuing to execute search', e);
+          }
           results = await service.executeSearch(apiPayload);
         }
       }

@@ -250,5 +250,77 @@ export const getRecentSearchData = async () => {
       searchId: null,
       error: error.message
     };
-  }
+  };
 };
+
+  export const getProposalRecentSearchData = async () => {
+    try {
+      // console.log('🚀 Fetching proposal recent search data...');
+      // console.log('📡 API Endpoint: /services/SavedSearch/RecentView/1/Recent Search/2');
+      
+      const response = await axiosService.get('/services/SavedSearch/RecentView/1/Recent Search/2');
+      
+      // console.log('📥 Raw API response:', response);
+      
+      if (response?.content?.Status === 'Success' && response?.content?.Data) {
+        // console.log('✅ API call successful, parsing data...');
+        
+        // Parse the Data field which contains the search criteria as JSON string
+        const searchData = JSON.parse(response.content.Data);
+        
+        // console.log('📊 Parsed search data:', searchData);
+        
+        // Convert the API payload to form field format
+        const { convertApiPayloadToFormFields, convertApiResponseToSearchParams } = await import('@/features/Opportunity-new/utils/savedSearchConverter');
+        
+        // console.log('🔄 Converting API payload to form fields...');
+        const formFields = convertApiPayloadToFormFields(searchData);
+        // console.log('📋 Converted form fields:', formFields);
+        
+        // console.log('🔄 Converting to searchParams format...');
+        const searchParams = convertApiResponseToSearchParams(response);
+        // console.log('📋 Converted searchParams:', searchParams);
+        
+        const result = {
+          success: true,
+          formFields,
+          searchParams,
+          rawData: searchData,
+          searchId: response.content.Value || null
+        };
+        
+        // console.log('✅ Final result object:', result);
+        return result;
+        
+      } else {
+        // console.warn('⚠️ No proposal recent search data found or invalid response format');
+        // console.log('📊 Response content:', response?.content);
+        
+        const result = {
+          success: false,
+          formFields: {},
+          searchParams: {},
+          rawData: null,
+          searchId: null
+        };
+        
+        // console.log('❌ Returning empty result:', result);
+        return result;
+      }
+      
+    } catch (error) {
+      // console.error('❌ Failed to fetch proposal recent search data:', error);
+      
+      const result = {
+        success: false,
+        formFields: {},
+        searchParams: {},
+        rawData: null,
+        searchId: null,
+        error: error.message
+      };
+      
+      // console.log('❌ Returning error result:', result);
+      return result;
+    }
+  };

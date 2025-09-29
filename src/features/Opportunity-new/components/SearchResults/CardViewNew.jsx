@@ -99,14 +99,11 @@ const OpportunityItemCard = ({ opportunity, onClick, onEdit }) => {
   };
 
   const handleCardDoubleClick = () => {
-    if (typeof onClick === "function") {
-      onClick(opportunity);
-      return;
-    }
     // Fallback: try navigate to an edit route if available in the app
-    if (opportunity?.id) {
+    if (opportunity?.id || opportunity?.ID) {
       try {
-        navigate(`/edit-opportunity/${opportunity.id}`);
+        const id = opportunity?.id ?? opportunity?.ID;
+        navigate(`/edit-opportunity-new/${id}`);
       } catch (_) {
         /* navigation optional */
       }
@@ -115,18 +112,12 @@ const OpportunityItemCard = ({ opportunity, onClick, onEdit }) => {
 
   const handleEdit = (e) => {
     e?.stopPropagation?.();
-    // if (typeof onEdit === "function") {
-    //   onEdit(opportunity);
-    //   return;
-    // }
-    console.log("handleEdit", opportunity);
-    // if (opportunity?.id) {
-    //   try {
-    //     navigate(`/edit-opportunity/${opportunity.id}`);
-    //   } catch (_) {
-    //     /* navigation optional */
-    //   }
-    // }
+    const id = opportunity?.id ?? opportunity?.ID;
+    if (id) {
+      try {
+        navigate(`/edit-opportunity-new/${id}`);
+      } catch (_) { /* no-op */ }
+    }
   };
 
   const amountValue = formatAmount(opportunity?.amount ?? opportunity?.Amount);

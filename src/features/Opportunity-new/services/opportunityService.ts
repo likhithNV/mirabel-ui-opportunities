@@ -548,7 +548,7 @@ export class OpportunityService {
       const values = Array.isArray(searchParams.contactEmail)
         ? searchParams.contactEmail
         : String(searchParams.contactEmail).split(',').filter(v => v.trim());
-      emailValue = values.map(v => `SW=${v.trim()}~`).join('');
+      emailValue = values.map((v: string) => `SW=${v.trim()}~`).join('');
     }
 
     const requestPayload = {
@@ -718,7 +718,7 @@ export class OpportunityService {
 
         // Check for ColumnConfig in the main search response
         if (contentData.ColumnConfig && Array.isArray(contentData.ColumnConfig)) {
-          apiColumnConfig = contentData.ColumnConfig.map(item => ({
+          apiColumnConfig = contentData.ColumnConfig.map((item: any) => ({
             id: item.PropertyMappingName ? item.PropertyMappingName.toLowerCase() : item.DBColumnsNames?.toLowerCase(),
             label: item.VisibleColumns || item.PropertyMappingName || item.DBColumnsNames,
             dbName: item.DBColumnsNames,
@@ -736,7 +736,7 @@ export class OpportunityService {
 
         // Check for ColumnConfig in the main search response (fallback path)
         if (responseData.Data.ColumnConfig && Array.isArray(responseData.Data.ColumnConfig)) {
-          apiColumnConfig = responseData.Data.ColumnConfig.map(item => ({
+          apiColumnConfig = responseData.Data.ColumnConfig.map((item: any) => ({
             id: item.PropertyMappingName ? item.PropertyMappingName.toLowerCase() : item.DBColumnsNames?.toLowerCase(),
             label: item.VisibleColumns || item.PropertyMappingName || item.DBColumnsNames,
             dbName: item.DBColumnsNames,
@@ -951,12 +951,12 @@ export class OpportunityService {
     return response;
   }
 
-  async getOpportunityStages(): Promise<any> {
-    console.log('OpportunityService: Fetching opportunity stages');
-    const response = await axiosService.get(API_URLS.ADMIN.OPPORTUNITY_STAGES);
-    console.log('OpportunityService: Stages API Response:', response);
-    return response;
-  }
+  // async getOpportunityStages(): Promise<any> {
+  //   console.log('OpportunityService: Fetching opportunity stages');
+  //   const response = await axiosService.get(API_URLS.ADMIN.OPPORTUNITY_STAGES);
+  //   console.log('OpportunityService: Stages API Response:', response);
+  //   return response;
+  // }
 
   // Toggle a stage timeline date (checkmark columns) using Insert/Delete actions
   async toggleOpportunityStageDate(opportunityId: string, stageId: number, shouldInsert: boolean): Promise<any> {

@@ -5,10 +5,11 @@ import DynamicFormRenderer from './DynamicFormRenderer';
 import { OPPORTUNITY_FORM_CONFIG } from '../config/opportunityFormConfig';
 import { PROPOSAL_FORM_CONFIG } from '../config/proposalFormConfig';
 import { GradientTabBar } from '@/shared/components/ui/GradientTabBar';
-import { getRecentSearchData, loadSavedSearch } from '@/services/userService';
+import { getProposalRecentSearchData, getRecentSearchData, loadSavedSearch } from '@/services/userService';
 import { buildSearchJson } from '@/features/Opportunity/utils/searchJsonBuilder';
 import SettingsPanel from '@/components/ui/SettingsPanel';
 import { ADVANCED_SEARCH_TABS } from '../../constants/constants';
+import viewsApi from '../../services/viewsApi';
 
 const AdvancedSearch = () => {
   const [activeTab, setActiveTab] = useState('opportunities');
@@ -62,18 +63,31 @@ const AdvancedSearch = () => {
 useEffect(() => {
     const loadRecentSearch = async () => {
       try {
+        // get page settings
+        const viewPage = await viewsApi.getPageSettings(1, -1);
+        const showType = viewPage.content.Data.ShowType;
+
         setIsLoadingRecentSearch(true);
         const recentSearchResult = await getRecentSearchData();
+        setActiveTab(recentSearchResult.rawData?.ResultType == 2 ? 'proposals' : 'opportunities');
+
 
         console.log('📥 API Response received:', recentSearchResult);
 
         if (recentSearchResult.success && recentSearchResult.searchParams) {
           // Update the filters with the recent search data in searchParams format
           setSearchParams(recentSearchResult.searchParams);
-          setOpportunitiesFormData(recentSearchResult.searchParams);
-        //   setProposalsFormData(recentSearchResult.searchParams);
+          if(recentSearchResult.rawData?.ResultType == 1 ) { 
+            setOpportunitiesFormData(recentSearchResult.searchParams);
+          } else {
+            setProposalsFormData(recentSearchResult.searchParams);
+          }
           // Build searchJSON with the loaded data
           buildSearchJSON(recentSearchResult.searchParams);
+          if(showType == 1) {
+            // show results if showType is 1
+            setShowResults(true);
+          }
 
         } else {
           console.log('⚠️ No recent search data available or failed to load for opportunities');

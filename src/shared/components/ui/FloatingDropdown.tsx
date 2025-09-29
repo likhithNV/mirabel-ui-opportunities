@@ -132,7 +132,7 @@ export const FloatingDropdown: React.FC<FloatingDropdownProps> = ({
     const viewportHeight = window.innerHeight
     const spaceBelow = viewportHeight - triggerRect.bottom
     const spaceAbove = triggerRect.top
-    const dropdownHeight = 320 // Approximate max height
+    const dropdownHeight = 200 // Approximate max height
     
     // Position above if not enough space below
     const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > dropdownHeight

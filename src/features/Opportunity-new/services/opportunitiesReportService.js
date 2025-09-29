@@ -1,6 +1,6 @@
-import apiService from '../../Opportunity/Services/apiService';
 import { getCurrentUserId } from '../../../utils/userUtils';
 import { logger } from '../../../components/shared/logger';
+import apiService from './apiService';
 
 /**
  * Service for handling opportunities/report/all API calls

@@ -92,7 +92,7 @@ const EnhancedDataTable = React.memo(<T extends Record<string, any>>({
     onSelectionChange: setSelectedRows,
     onRowClick: onRowClick,
     enableMultiSelect: enableSelection,
-    tableRef: tableRef
+    tableRef: tableRef as React.RefObject<HTMLTableElement>
   })
 
   // Event handlers

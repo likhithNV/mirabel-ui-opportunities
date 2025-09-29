@@ -94,9 +94,16 @@ const MultiSelectDropdown = ({
   const updatePortalPosition = () => {
     if (!buttonRef.current) return;
     const rect = buttonRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const dropdownHeight = 280; // maxHeight from dropdown styles
+    
+    // Check if there's enough space below the trigger
+    const spaceBelow = viewportHeight - rect.bottom;
+    const shouldPositionAbove = spaceBelow < dropdownHeight + 20; // 20px buffer
+    
     setPortalStyle({
       position: 'fixed',
-      top: rect.bottom + 4,
+      top: shouldPositionAbove ? rect.top - dropdownHeight - 2 : rect.bottom + 2,
       left: rect.left,
       width: rect.width,
       zIndex: 99

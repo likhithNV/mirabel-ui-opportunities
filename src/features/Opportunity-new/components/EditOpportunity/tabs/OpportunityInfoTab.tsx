@@ -116,7 +116,7 @@ const OpportunityInfoTab: React.FC<OpportunityInfoTabProps> = ({
         contactDetails: {},
         amount: "",
         probability: "",
-        status: "",
+        status: "Open", // Default status to avoid validation errors
         businessUnit: [],
         businessUnitId: [],
         businessUnitDetails: [],
@@ -219,6 +219,7 @@ const OpportunityInfoTab: React.FC<OpportunityInfoTabProps> = ({
               error={getFieldError('status')}
               required={isFieldRequired('status')}
               disabled={shouldDisableFields}
+              
               clearable={false}
             />
           </div>

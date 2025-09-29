@@ -16,8 +16,13 @@ import Loader from '@/components/ui/loader';
 import { useOpportunityForm } from '../../hooks/useOpportunityForm';
 import OpportunityStatsSection from './tabs/OpportunityStatsSection';
 
-const EditOpportunity: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+type EditOpportunityProps = {
+    overrideId?: string;
+};
+
+const EditOpportunity: React.FC<EditOpportunityProps> = ({ overrideId }) => {
+    const routeParams = useParams<{ id: string }>();
+    const id = overrideId ?? routeParams.id;
     const navigate = useNavigate();
 
     const isAddMode = !id || id === '0';

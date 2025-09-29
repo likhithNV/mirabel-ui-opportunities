@@ -5,17 +5,17 @@ import { EnhancedFilterBar } from '@/components/ui/EnhancedFilterBar';
 import { useSearchResults } from '../../hooks/useSearchResults';
 import { ExternalLink, MoreVertical, Edit, Check } from 'lucide-react';
 import { OpportunityStatsCards, ProposalStatsCards } from '../Stats';
-import { logger } from '../../../../components/shared/logger';
 import { useNavigate } from 'react-router-dom';
 import { getDefaultColumnOrder } from '../../hooks/helperData';
-import ViewsSidebar from '@/components/ui/views/ViewsSidebar';
-import { NewLoader } from '@/components/ui/NewLoader';
+import ViewsSidebar from '@/shared/components/ui/views/ViewsSidebar';
+import { NewLoader } from '@/shared/components/ui/NewLoader';
 import KanbanView from '../kanban/KanbanView';
-import { FloatingLabelSelect } from '@/shared/components/ui/FloatingLabelSelect';
-import { SimpleMultiSelect } from '@/shared/components/ui/SimpleMultiSelect';
 import { opportunityService } from '../../services/opportunityService';
 import { userServiceNew } from '../../services/userServiceNew';
 import contactsApi from '@/services/contactsApi';
+import { useSearchMasterData } from '../../hooks/useSearchMasterData';
+import { useQuickFilters } from '../../hooks/useQuickFilters';
+import './SearchResults.css';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +25,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/shared/components/ui/alert-dialog";
 
 const SearchResults = ({ searchParams, setShowResults, searchType = 'opportunities', setSearchParams }) => {
   const { data, loading, error, refetch } = useSearchResults(searchParams, searchType);
@@ -34,29 +34,20 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     all: searchType === 'opportunities' ? 'All Opportunities' : 'All Proposals',
     probability: searchParams.probability || [],
     // Keep raw rep IDs in UI state; format to IE=...~ only when building payloads
-    reps: Array.isArray(searchParams.assignedRep) ? searchParams.assignedRep : []
+    reps: Array.isArray(searchParams.assignedRep) ? searchParams.assignedRep : [],
+    ListID: undefined,
   });
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
   const [isViewsSidebarOpen, setIsViewsSidebarOpen] = useState(false);
 
-  // Master data for dropdowns
-  const [masterData, setMasterData] = useState({
-    leadSources: [],
-    leadTypes: [],
-    stages: [],
-    prospectingStages: []
-  });
-  const [masterDataLoaded, setMasterDataLoaded] = useState(false);
-  const [quickStatusOptions, setQuickStatusOptions] = useState([
-    { value: 'all', label: 'All Opportunities' },
-    { value: 'Open', label: 'Open Opportunities' },
-    { value: 'Won', label: 'Won Opportunities' },
-    { value: 'Lost', label: 'Lost Opportunities' }
-  ]);
-
-  // Reps options state (must be declared before use in filter definitions)
-  const [repsOptions, setRepsOptions] = useState([]);
+  // Master data and dropdown options via hook
+  const {
+    masterData,
+    masterDataLoaded,
+    repsOptions,
+    quickStatusOptions
+  } = useSearchMasterData();
   const probabilityOptions = [
     { value: 'all', label: 'All Probabilities' },
     ...Array.from({ length: 11 }, (_, i) => ({ value: String(i * 10), label: `${i * 10}%` }))
@@ -68,125 +59,46 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
 
   // Enhance rows with dropdown options
   const enhanceRowsWithOptions = (rows) => {
-    return rows.map(row => ({
-      ...row,
-      _leadSourceOptions: masterData.leadSources,
-      _leadTypeOptions: masterData.leadTypes,
-      _stages: masterData.stages,
-      _prospectingStages: masterData.prospectingStages
-    }));
+    return rows.map((row, index) => {
+      const stableId = (
+        row.id ||
+        row.ID ||
+        row.OpportunityID ||
+        row.ProposalID ||
+        row.RecordID ||
+        row.GUID ||
+        (row.Proposal && (row.Proposal.ID || row.ProposalId)) ||
+        `row-${row.Name || row.OpportunityName || ''}-${row.ContactDetails?.ID || ''}-${index}`
+      );
+      return {
+        id: String(stableId),
+        ...row,
+        _leadSourceOptions: masterData.leadSources,
+        _leadTypeOptions: masterData.leadTypes,
+        _stages: masterData.stages,
+        _prospectingStages: masterData.prospectingStages
+      };
+    });
   };
 
-  // Filter definitions for EnhancedFilterBar
-  const getFilterDefinitions = () => {
-    if (searchType === 'proposals') {
-      // For proposals, use PowerMultiSelect with reps loaded from API
-      return [
-        {
-          id: 'proposalReps',
-          placeholder: 'All Proposal Reps',
-          type: 'multi-select',
-          options: repsOptions,
-          value: Array.isArray(filters.proposalReps) ? filters.proposalReps : [],
-          onChange: (values) => {
-            const allToken = 'IE=all~';
-            let next = Array.isArray(values) ? [...values] : [];
-            const hasAllNow = next.includes(allToken);
-            const hadAllPrev = Array.isArray(filters.proposalReps) && filters.proposalReps.includes(allToken);
-            if (hasAllNow && !hadAllPrev) {
-              next = [allToken];
-            } else if (hasAllNow && hadAllPrev && next.length > 1) {
-              next = next.filter(v => v !== allToken);
-            } else {
-              next = next.filter(v => v !== allToken);
-            }
-            setFilters(prev => ({ ...prev, proposalReps: next }));
-          }
-        }
-      ];
-    } else {
-      // For opportunities, show the original filters
-      return [
-        {
-          id: 'opportunities',
-          placeholder: 'All Opportunities',
-          options: quickStatusOptions,
-          value: 'all',
-          onChange: (value) => {
-            setFilters(prev => ({ ...prev, opportunities: value === 'all' ? undefined : value }));
-          }
-        },
-        {
-          id: 'probability',
-          placeholder: 'All Probability',
-          type: 'multi-select',
-          options: probabilityOptions,
-          value: Array.isArray(filters.probability) ? filters.probability : [],
-          onChange: (values) => {
-            const prev = Array.isArray(filters.probability) ? filters.probability : [];
-            let next = Array.isArray(values) ? [...values] : [];
-            const hasAllNow = next.includes('all');
-            const hadAllPrev = prev.includes('all');
-            if (hasAllNow && !hadAllPrev) {
-              // user selected All -> keep only All
-              next = ['all'];
-            } else if (hasAllNow && hadAllPrev && next.length > 1) {
-              // user added another while All was selected -> drop All
-              next = next.filter(v => v !== 'all');
-            } else if (!hasAllNow && hadAllPrev) {
-              // user deselected All -> keep others as-is
-              // next already excludes 'all'
-            } else {
-              // normal multi-select, ensure 'all' not accidentally present
-              next = next.filter(v => v !== 'all');
-            }
-            setSearchParams(prev => ({ ...prev, probability: next.filter(v => v !== 'all') }));
-            setFilters(prevState => ({ ...prevState, probability: next }));
-          }
-        },
-        {
-          id: 'reps',
-          placeholder: 'All Reps',
-          type: 'multi-select',
-          options: repsOptions,
-          value: Array.isArray(filters.reps) ? filters.reps : [],
-          onChange: (values) => {
-            const prev = Array.isArray(filters.reps) ? filters.reps : [];
-            let next = Array.isArray(values) ? [...values] : [];
-            const allToken = 'all';
-            const hasAllNow = next.includes(allToken);
-            const hadAllPrev = prev.includes(allToken);
-            if (hasAllNow && !hadAllPrev) {
-              next = [allToken];
-            } else if (hasAllNow && hadAllPrev && next.length > 1) {
-              next = next.filter(v => v !== allToken);
-            } else if (!hasAllNow && hadAllPrev) {
-              // user deselected All -> keep others
-            } else {
-              next = next.filter(v => v !== allToken);
-            }
-            setSearchParams(prev => ({ ...prev, assignedRep: next.filter(rep => rep !== allToken) }));
-            setFilters(prevState => ({ ...prevState, reps: next }));
-          }
-        }
-      ];
-    }
-  };
-
-  const filterDefinitions = getFilterDefinitions();
+  // Build quick filter definitions using hook
+  const filterDefinitions = useQuickFilters({
+    searchType,
+    filters,
+    setFilters,
+    setSearchParams,
+    repsOptions,
+    quickStatusOptions,
+    probabilityOptions
+  });
 
   // Build params for quick filters → API payload subset
   const buildQuickParams = (override = null) => {
     const f = override || filters;
     const params = {};
-    // quickStatus from opportunities dropdown
-    if (f.opportunities && f.opportunities !== 'all') {
-      // When a saved view/quick option is chosen
-      if (['Open', 'Won', 'Lost'].includes(f.opportunities)) {
-        params.quickStatus = f.opportunities;
-      } else {
-        params.quickStatus = f.opportunities; // saved search name; backend maps via ListID elsewhere if needed
-      }
+    // Include ListID if present (saved search)
+    if (f.ListID && /^\d+$/.test(String(f.ListID))) {
+      params.ListID = parseInt(String(f.ListID), 10);
     }
     // Probability: selected numeric percentages -> IE-format string array expected downstream
     if (Array.isArray(f.probability) && f.probability.length > 0) {
@@ -202,29 +114,14 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     return params;
   };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const reps = await userServiceNew.getUsersForDropdown();
-        // Keep raw value; 'All Reps' uses token 'all'
-        const formatted = [{ value: 'all', label: 'All Reps' }, ...reps.map(u => ({ value: u.value, label: u.display }))];
-        setRepsOptions(formatted);
-      } catch (e) {
-        setRepsOptions([{ value: 'all', label: 'All Reps' }]);
-      }
-    })();
-  }, []);
+  // reps loaded via useSearchMasterData
 
   // Edit functionality
   const handleEditClick = (e, row) => {
     e.stopPropagation();
     const id = row.ID || row.id;
     if (id) {
-      if (isOpportunities) {
         window.location.href = `/edit-opportunity-new/${id}`;
-      } else {
-        window.location.href = `/edit-opportunity-new/${id}`;
-      }
     }
   };
 
@@ -248,7 +145,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
   };
 
   const handleFilterClick = () => {
-    logger.info("Filter button clicked, navigating to /advanced-search");
     try {
       // Navigate to advanced search with opportunities tab and preserve current filters
       const advancedSearchParams = new URLSearchParams();
@@ -279,135 +175,20 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       advancedSearchParams.set("tab", "opportunities");
 
       const finalUrl = `/app/advanced-search-new`;
-      logger.info(
-        "Navigating to advanced search with opportunities tab:",
-        finalUrl
-      );
-      logger.info("Quick Filter filters being passed:", filters);
+      
       // window.open(finalUrl);
       setShowResults(false);
       // navigate(finalUrl);
     } catch (error) {
-      logger.error("Navigation error:", error);
+      
       // Fallback: just refresh the current data if navigation fails
       refetch?.();
     }
   };
 
-  // Fetch master data for dropdowns
-  useEffect(() => {
-    const fetchMasterData = async () => {
-      try {
-        const [leadSourcesResponse, leadTypesResponse, stagesResponse, prospectingStagesResponse, savedSearches] = await Promise.all([
-          contactsApi.getLeadSources(),
-          contactsApi.getLeadTypes(),
-          opportunityService.getOpportunityStages(),
-          contactsApi.getProspectingStages(),
-          userServiceNew.getSavedSearches()
-        ]);
+  // master data loaded via useSearchMasterData
 
-        // Debug: Log the actual raw responses
-        console.log('DEBUG: Raw API responses:', {
-          leadSourcesResponse,
-          leadTypesResponse,
-          stagesResponse,
-          prospectingStagesResponse
-        });
-
-        // Process LeadSources - data is in content.Data.LeadSources
-        const leadSources = leadSourcesResponse?.content?.Data?.LeadSources || [];
-        const formattedLeadSources = leadSources.map(source => ({
-          value: source.Value,
-          label: source.Display,
-          id: source.Value,
-          name: source.Display
-        }));
-
-        // Process LeadTypes - data is in content.Data.LeadTypes
-        const leadTypes = leadTypesResponse?.content?.Data?.LeadTypes || [];
-        const formattedLeadTypes = leadTypes.map(type => ({
-          value: type.Value,
-          label: type.Display,
-          id: type.Value,
-          name: type.Display
-        }));
-
-        // Process Stages - data is in content.List (not in Data object)
-        const stages = stagesResponse?.content?.List || [];
-        const formattedStages = stages.map(stage => ({
-          id: stage.ID || stage.id,
-          name: stage.Stage || stage.Name || stage.name,
-          value: stage.ID || stage.id,
-          label: stage.Stage || stage.Name || stage.name,
-          colorCode: stage.ColorCode || stage.colorCode || '#4fb3ff'
-        }));
-
-        // Process ProspectingStages - data is in content.Data.ProspectingStages
-        const prospectingStages = prospectingStagesResponse?.content?.Data?.ProspectingStages || [];
-        const formattedProspectingStages = prospectingStages.map(stage => ({
-          value: stage.Value,
-          label: stage.Display,
-          id: stage.Value,
-          name: stage.Display
-        }));
-
-        setMasterData(prev => ({
-          ...prev,
-          leadSources: formattedLeadSources,
-          leadTypes: formattedLeadTypes,
-          stages: formattedStages,
-          prospectingStages: formattedProspectingStages
-        }));
-
-        // Build Quick Status options from saved searches
-        const qs = [
-          { value: 'all', label: 'All Opportunities' },
-          { value: 'Open', label: 'Open Opportunities' },
-          { value: 'Won', label: 'Won Opportunities' },
-          { value: 'Lost', label: 'Lost Opportunities' },
-          ...((savedSearches?.allOpportunities || []).map(s => ({ value: s.Name, label: s.Name })))
-        ];
-        setQuickStatusOptions(qs);
-
-        // Debug: Log the processed data
-        console.log('DEBUG: Processed master data:', {
-          leadSources: formattedLeadSources,
-          leadTypes: formattedLeadTypes,
-          stages: formattedStages,
-          prospectingStages: formattedProspectingStages
-        });
-
-        logger.info('SearchResults: Master data loaded successfully:', {
-          leadSourcesCount: formattedLeadSources.length,
-          leadTypesCount: formattedLeadTypes.length,
-          stagesCount: formattedStages.length,
-          prospectingStagesCount: formattedProspectingStages.length
-        });
-
-        setMasterDataLoaded(true);
-      } catch (error) {
-        logger.error('SearchResults: Failed to load master data:', error);
-        setMasterDataLoaded(true); // Set to true even on error to prevent infinite loading
-      }
-    };
-
-    fetchMasterData();
-  }, []);
-
-
-
-  // Debug logging
-  useEffect(() => {
-    if (data) {
-      logger.info('SearchResults: Component mounted with searchParams:', searchParams);
-      logger.info('SearchResults: Data received:', data);
-      logger.info('SearchResults: Data keys:', Object.keys(data || {}));
-      logger.info('SearchResults: apiColumnConfig:', data?.apiColumnConfig);
-      logger.info('SearchResults: ColumnConfig:', data?.ColumnConfig);
-      logger.info('SearchResults: Loading state:', loading);
-      logger.info('SearchResults: Error state:', error);
-    }
-  }, [searchParams, data, loading, error]);
+  // Debug logging removed
 
   // Helper function to get nested object values
   const getNestedValue = (obj, path) => {
@@ -417,11 +198,10 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
   // Generate columns from API ColumnConfig
   const generateColumnsFromConfig = (columnConfig) => {
     if (!columnConfig || !Array.isArray(columnConfig)) {
-      logger.info('SearchResults: No column config found, using default columns');
       return getDefaultColumns();
     }
 
-    logger.info('SearchResults: Generating columns from API config:', columnConfig);
+    
     const columns = [];
 
     // Add edit column first
@@ -459,28 +239,13 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       if (mappingKey && !seenMappings.has(mappingKey)) {
         seenMappings.add(mappingKey);
         uniqueColumnConfig.push(col);
-        logger.info('SearchResults: Added unique column:', {
-          visibleColumns: col.visibleColumns,
-          propertyMappingName: col.propertyMappingName,
-          isDefault: col.isDefault,
-          mappingKey: mappingKey
-        });
+        
       } else {
-        logger.info('SearchResults: Skipped duplicate column:', {
-          visibleColumns: col.visibleColumns,
-          propertyMappingName: col.propertyMappingName,
-          isDefault: col.isDefault,
-          mappingKey: mappingKey,
-          reason: 'Duplicate PropertyMappingName'
-        });
+        
       }
     });
 
-    logger.info('SearchResults: Processing unique columns:', uniqueColumnConfig.map(col => ({
-      visibleColumns: col.visibleColumns,
-      propertyMappingName: col.propertyMappingName,
-      isDefault: col.isDefault
-    })));
+    
 
     // Debug: Check specifically for Product and Loss Reason columns
     const productColumn = uniqueColumnConfig.find(col =>
@@ -492,33 +257,17 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       col.visibleColumns === 'Loss Reason'
     );
 
-    logger.info('SearchResults: Product column found:', productColumn);
-    logger.info('SearchResults: Loss Reason column found:', lossReasonColumn);
+    
 
     uniqueColumnConfig.forEach(col => {
-      logger.info('SearchResults: Processing column config:', {
-        visibleColumns: col.visibleColumns,
-        propertyMappingName: col.propertyMappingName,
-        dbName: col.dbName,
-        isDefault: col.isDefault
-      });
+      
 
       const columnDef = createColumnFromConfig(col);
       if (columnDef) {
-        logger.info('SearchResults: Created column definition:', {
-          id: columnDef.id,
-          header: columnDef.header,
-          accessor: columnDef.accessor,
-          columnType: columnDef.columnType || 'unknown'
-        });
+        
         columns.push(columnDef);
       } else {
-        logger.error('SearchResults: Failed to create column for config:', {
-          visibleColumns: col.visibleColumns,
-          propertyMappingName: col.propertyMappingName,
-          dbName: col.dbName,
-          isDefault: col.isDefault
-        });
+        
       }
     });
 
@@ -536,12 +285,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       )
     });
 
-    logger.info('SearchResults: Final generated columns:', columns.map(col => ({
-      id: col.id,
-      header: col.header,
-      accessor: col.accessor,
-      columnType: col.columnType
-    })));
+    
 
     return columns;
   };
@@ -581,13 +325,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     const mappingPath = propertyMappingName || dbName;
     const pathLc = String(mappingPath || "").toLowerCase();
 
-    logger.info('SearchResults: Processing column mapping:', {
-      visibleColumns,
-      propertyMappingName,
-      dbName,
-      mappingPath,
-      pathLc
-    });
+    
 
     // Helper function to get column width based on type
     const getColumnWidth = (type) => {
@@ -647,26 +385,21 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     } else if (mappingPath === 'ProductDetails.Name') {
       columnType = 'product';
       renderId = 'product';
-      logger.info('SearchResults: FOUND Product column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'OppLossReasonDetails.Name') {
       columnType = 'lossReason';
       renderId = 'lossReason';
-      logger.info('SearchResults: FOUND Loss Reason column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'ProposalID') {
       columnType = 'proposalId';
       renderId = 'proposalId';
     } else if (mappingPath === 'ProspectingStage' || mappingPath === 'SubContactDetails.ProspectingStage' || mappingPath === 'ContactDetails.ProspectingStage') {
       columnType = 'prospectingStage';
       renderId = 'prospectingStage';
-      logger.info('SearchResults: FOUND Prospecting Stage column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'LeadSource' || mappingPath === 'SubContactDetails.LeadSource' || mappingPath === 'ContactDetails.LeadSource') {
       columnType = 'leadSource';
       renderId = 'leadSource';
-      logger.info('SearchResults: FOUND Lead Source column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'LeadType' || mappingPath === 'SubContactDetails.LeadType' || mappingPath === 'ContactDetails.LeadType') {
       columnType = 'leadType';
       renderId = 'leadType';
-      logger.info('SearchResults: FOUND Lead Type column mapping!', { mappingPath, visibleColumns });
     } else {
       // Fallback to regex patterns and intelligent detection for other cases
       if (/(^|\.)status$/.test(pathLc)) {
@@ -737,12 +470,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       }
     }
 
-    logger.info('SearchResults: Column type detection result:', {
-      mappingPath,
-      columnType,
-      renderId,
-      visibleColumns
-    });
+    
 
     // Create unique ID for the column
     const uniqueId = mappingPath ? mappingPath.replace(/\./g, '_') : (renderId || 'unknown');
@@ -977,7 +705,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                   stage={stage}
                   opportunityId={row.ID || row.id}
                   onStageChange={(opportunityId, newStage) => {
-                    logger.info(`Stage changed for opportunity ${opportunityId} to ${newStage}`);
                     // Trigger refresh to update the data
                     refetch?.();
                   }}
@@ -1093,9 +820,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
             // Import ProspectingStageDropdown component for inline editing
             const ProspectingStageDropdown = React.lazy(() => import('../table/ProspectingStageDropdown'));
 
-            console.log('DEBUG: Prospecting Stage render - masterData.prospectingStages:', masterData.prospectingStages);
-            console.log('DEBUG: Prospecting Stage render - current stage:', prospectingStage);
-            console.log('DEBUG: Prospecting Stage render - masterDataLoaded:', masterDataLoaded);
+            
 
             if (!masterDataLoaded || !masterData.prospectingStages.length) {
               return (
@@ -1115,7 +840,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                   prospectingStage={prospectingStage}
                   opportunity={row}
                   onStageChange={(opportunityId, newStage) => {
-                    logger.info(`Prospecting stage changed for opportunity ${opportunityId} to ${newStage}`);
                     // Trigger refresh to update the data
                     refetch?.();
                   }}
@@ -1146,9 +870,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                 ? leadSource.split(',').map(s => s.trim()).filter(Boolean)
                 : [];
 
-            console.log('DEBUG: Lead Source render - masterData.leadSources:', masterData.leadSources);
-            console.log('DEBUG: Lead Source render - selectedValues:', selectedValues);
-            console.log('DEBUG: Lead Source render - masterDataLoaded:', masterDataLoaded);
+            
 
             if (!masterDataLoaded || !masterData.leadSources.length) {
               return <span className="text-sm text-gray-500">Loading...</span>;
@@ -1180,12 +902,11 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                           IsSubContactUpdate: false,
                         });
 
-                        logger.info("LeadSource updated successfully", row.ID, selectedLabels);
+                        
                         // Trigger refresh to update the data
                         refetch?.();
                       }
                     } catch (error) {
-                      logger.error("Failed to update lead source:", error);
                     }
                   }}
                   placeholder="Select lead sources"
@@ -1215,9 +936,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                 ? leadType.split(',').map(s => s.trim()).filter(Boolean)
                 : [];
 
-            console.log('DEBUG: Lead Type render - masterData.leadTypes:', masterData.leadTypes);
-            console.log('DEBUG: Lead Type render - selectedValues:', selectedValues);
-            console.log('DEBUG: Lead Type render - masterDataLoaded:', masterDataLoaded);
+            
 
             if (!masterDataLoaded || !masterData.leadTypes.length) {
               return <span className="text-sm text-gray-500">Loading...</span>;
@@ -1248,12 +967,11 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                           IsSubContactUpdate: false,
                         });
 
-                        logger.info("LeadType updated successfully", row.ID, selectedLabels);
+                        
                         // Trigger refresh to update the data
                         refetch?.();
                       }
                     } catch (error) {
-                      logger.error("Failed to update lead type:", error);
                     }
                   }}
                   placeholder="Select lead types"
@@ -1594,13 +1312,11 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     const columnConfig = data?.apiColumnConfig || data?.ColumnConfig || data?.content?.Data?.ColumnConfig;
 
     if (columnConfig && Array.isArray(columnConfig) && columnConfig.length > 0) {
-      logger.info('SearchResults: Using API column configuration:', columnConfig);
       return generateColumnsFromConfig(columnConfig);
     }
 
     // If no API config, return minimal columns to avoid conflicts
-    logger.warn('SearchResults: No API column configuration available, using minimal columns');
-    logger.info('SearchResults: Available data keys:', Object.keys(data || {}));
+    
     return [
       {
         id: 'edit',
@@ -1689,38 +1405,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
 
   return (
     <>
-      <style>{`
-        .search-results-scroll-container {
-          height: 100%;
-          overflow: auto !important;
-          position: relative;
-        }
-        
-        .search-results-scroll-container .enhanced-data-table {
-          overflow: visible !important;
-          height: auto !important;
-        }
-        
-        .search-results-scroll-container .enhanced-data-table > div {
-          overflow: visible !important;
-        }
-        
-        .search-results-scroll-container .overflow-x-auto {
-          overflow: visible !important;
-        }
-        
-        .search-results-scroll-container table {
-          width: 100% !important;
-        }
-        
-        /* Ensure table header stays visible during scroll */
-        .search-results-scroll-container thead {
-          position: sticky !important;
-          top: 0 !important;
-          z-index: 10 !important;
-          background-color: rgb(243, 244, 246) !important;
-        }
-      `}</style>
       <div className="h-screen bg-gray-50 flex flex-col">
         {/* Statistics Cards: hide in kanban and split views */}
         {(viewMode !== 'split' && viewMode !== 'kanban') && (
@@ -1829,19 +1513,19 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                 id="search-results-table"
                 bulkActionContext={searchType === 'opportunities' ? 'products' : 'schedules'}
                 onRowClick={(row) => {
-                  logger.info('Row clicked:', row);
+                  
                 }}
                 onRowDoubleClick={(row) => {
                   window.location.href = `/${searchType}/${row.ID || row.id}`;
                 }}
                 onRowSelect={(selectedRows) => {
-                  logger.info('Selected rows:', selectedRows);
+                  
                 }}
                 onBulkAction={(action, rows) => {
-                  logger.info('Bulk action:', action, rows);
+                  
                 }}
                 onSort={(sortConfig) => {
-                  logger.info('Sort config:', sortConfig);
+                  
                 }}
               />
             </div>
@@ -1858,7 +1542,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
           columnOrder={getDefaultColumnOrder()}
           onColumnOrderChange={() => { }}
           onViewSelected={() => { }}
-          pageType="opportunities"
+          pageType={searchType}
           handleRefetch={()=> handleRefetch()}
           // setLoading={setIsLoading}
           />

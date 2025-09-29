@@ -211,7 +211,7 @@ export class SearchPayloadBuilder {
         "ContactAddedDateTo": null,
         "LeadQuality": this.getFieldValue(formData, 'Lead Information', 'leadQuality') || null,
         "LeadTypes": this.getFieldValue(formData, 'Lead Information', 'leadType') || null,
-        "ListID": 0,
+        "ListID": (() => { const v = this.getFieldValue(formData, '', 'ListID'); return v ? parseInt(v) : undefined; })(),
         "LeadSources": this.getFieldValue(formData, 'Lead Information', 'leadSource') || null,
         "ProspectingStages": null,
         "WorkFlows": null,
@@ -262,7 +262,7 @@ export class SearchPayloadBuilder {
       "IssueFromDate": "",
       "IssueToDate": "",
       "IssuebasedSearch": "",
-      "ListID": 0
+      "ListID": (() => { const v = this.getFieldValue(formData, '', 'ListID'); return v ? parseInt(v) : undefined; })()
     };
 
     logger.info('SearchPayloadBuilder: Built opportunities payload:', payload);
@@ -370,7 +370,7 @@ export class SearchPayloadBuilder {
         "ContactAddedDateTo": null,
         "LeadQuality": this.getFieldValue(formData, 'Lead Information', 'leadQuality') || null,
         "LeadTypes": this.getFieldValue(formData, 'Lead Information', 'leadType') || null,
-        "ListID": 0,
+        "ListID": (() => { const v = this.getFieldValue(formData, '', 'ListID'); return v ? parseInt(v) : undefined; })(),
         "LeadSources": this.getFieldValue(formData, 'Lead Information', 'leadSource') || null,
         "ProspectingStages": null,
         "WorkFlows": null,
@@ -427,7 +427,7 @@ export class SearchPayloadBuilder {
       "IssueFromDate": "",
       "IssueToDate": "",
       "IssuebasedSearch": "",
-      "ListID": 0
+      "ListID": (() => { const v = this.getFieldValue(formData, '', 'ListID'); return v ? parseInt(v) : undefined; })()
     };
 
     logger.info('SearchPayloadBuilder: Built proposals payload:', payload);

@@ -1,4 +1,4 @@
-import apiService from '../../Opportunity/Services/apiService';
+import apiService from './apiService';
 import { getCurrentUserId } from '../../../utils/userUtils';
 import { logger } from '../../../components/shared/logger';
 
@@ -130,8 +130,8 @@ export class ProposalsReportService {
       "SalesPresenter": null,
       "Stage": "",
       "CreatedBy": "",
-      "CreatedFrom": "06/01/2025",
-      "CreatedTo": "09/30/2025",
+      "CreatedFrom": "",
+      "CreatedTo": "",
       "CloseFrom": "",
       "CloseTo": "",
       "ActualCloseFrom": "",
