@@ -5,7 +5,6 @@ import { EnhancedFilterBar } from '@/shared/components/ui/EnhancedFilterBar';
 import { useSearchResults } from '../../hooks/useSearchResults';
 import { ExternalLink, MoreVertical, Edit, Check } from 'lucide-react';
 import { OpportunityStatsCards, ProposalStatsCards } from '../Stats';
-import { logger } from '../../../../components/shared/logger';
 import { useNavigate } from 'react-router-dom';
 import { getDefaultColumnOrder } from '../../hooks/helperData';
 import ViewsSidebar from '@/shared/components/ui/views/ViewsSidebar';
@@ -149,7 +148,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
   };
 
   const handleFilterClick = () => {
-    logger.info("Filter button clicked, navigating to /advanced-search");
     try {
       // Navigate to advanced search with opportunities tab and preserve current filters
       const advancedSearchParams = new URLSearchParams();
@@ -180,16 +178,12 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       advancedSearchParams.set("tab", "opportunities");
 
       const finalUrl = `/app/advanced-search-new`;
-      logger.info(
-        "Navigating to advanced search with opportunities tab:",
-        finalUrl
-      );
-      logger.info("Quick Filter filters being passed:", filters);
+      
       // window.open(finalUrl);
       setShowResults(false);
       // navigate(finalUrl);
     } catch (error) {
-      logger.error("Navigation error:", error);
+      
       // Fallback: just refresh the current data if navigation fails
       refetch?.();
     }
@@ -197,18 +191,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
 
   // master data loaded via useSearchMasterData
 
-  // Debug logging
-  useEffect(() => {
-    if (data) {
-      logger.info('SearchResults: Component mounted with searchParams:', searchParams);
-      logger.info('SearchResults: Data received:', data);
-      logger.info('SearchResults: Data keys:', Object.keys(data || {}));
-      logger.info('SearchResults: apiColumnConfig:', data?.apiColumnConfig);
-      logger.info('SearchResults: ColumnConfig:', data?.ColumnConfig);
-      logger.info('SearchResults: Loading state:', loading);
-      logger.info('SearchResults: Error state:', error);
-    }
-  }, [searchParams, data, loading, error]);
+  // Debug logging removed
 
   // Helper function to get nested object values
   const getNestedValue = (obj, path) => {
@@ -222,7 +205,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       return getDefaultColumns();
     }
 
-    logger.info('SearchResults: Generating columns from API config:', columnConfig);
+    
     const columns = [];
 
     // Add edit column first
@@ -260,28 +243,13 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       if (mappingKey && !seenMappings.has(mappingKey)) {
         seenMappings.add(mappingKey);
         uniqueColumnConfig.push(col);
-        logger.info('SearchResults: Added unique column:', {
-          visibleColumns: col.visibleColumns,
-          propertyMappingName: col.propertyMappingName,
-          isDefault: col.isDefault,
-          mappingKey: mappingKey
-        });
+        
       } else {
-        logger.info('SearchResults: Skipped duplicate column:', {
-          visibleColumns: col.visibleColumns,
-          propertyMappingName: col.propertyMappingName,
-          isDefault: col.isDefault,
-          mappingKey: mappingKey,
-          reason: 'Duplicate PropertyMappingName'
-        });
+        
       }
     });
 
-    logger.info('SearchResults: Processing unique columns:', uniqueColumnConfig.map(col => ({
-      visibleColumns: col.visibleColumns,
-      propertyMappingName: col.propertyMappingName,
-      isDefault: col.isDefault
-    })));
+    
 
     // Debug: Check specifically for Product and Loss Reason columns
     const productColumn = uniqueColumnConfig.find(col =>
@@ -293,33 +261,17 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       col.visibleColumns === 'Loss Reason'
     );
 
-    logger.info('SearchResults: Product column found:', productColumn);
-    logger.info('SearchResults: Loss Reason column found:', lossReasonColumn);
+    
 
     uniqueColumnConfig.forEach(col => {
-      logger.info('SearchResults: Processing column config:', {
-        visibleColumns: col.visibleColumns,
-        propertyMappingName: col.propertyMappingName,
-        dbName: col.dbName,
-        isDefault: col.isDefault
-      });
+      
 
       const columnDef = createColumnFromConfig(col);
       if (columnDef) {
-        logger.info('SearchResults: Created column definition:', {
-          id: columnDef.id,
-          header: columnDef.header,
-          accessor: columnDef.accessor,
-          columnType: columnDef.columnType || 'unknown'
-        });
+        
         columns.push(columnDef);
       } else {
-        logger.error('SearchResults: Failed to create column for config:', {
-          visibleColumns: col.visibleColumns,
-          propertyMappingName: col.propertyMappingName,
-          dbName: col.dbName,
-          isDefault: col.isDefault
-        });
+        
       }
     });
 
@@ -337,12 +289,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       )
     });
 
-    logger.info('SearchResults: Final generated columns:', columns.map(col => ({
-      id: col.id,
-      header: col.header,
-      accessor: col.accessor,
-      columnType: col.columnType
-    })));
+    
 
     return columns;
   };
@@ -382,13 +329,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     const mappingPath = propertyMappingName || dbName;
     const pathLc = String(mappingPath || "").toLowerCase();
 
-    logger.info('SearchResults: Processing column mapping:', {
-      visibleColumns,
-      propertyMappingName,
-      dbName,
-      mappingPath,
-      pathLc
-    });
+    
 
     // Helper function to get column width based on type
     const getColumnWidth = (type) => {
@@ -538,12 +479,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       }
     }
 
-    logger.info('SearchResults: Column type detection result:', {
-      mappingPath,
-      columnType,
-      renderId,
-      visibleColumns
-    });
+    
 
     // Create unique ID for the column
     const uniqueId = mappingPath ? mappingPath.replace(/\./g, '_') : (renderId || 'unknown');
@@ -894,9 +830,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
             // Import ProspectingStageDropdown component for inline editing
             const ProspectingStageDropdown = React.lazy(() => import('../table/ProspectingStageDropdown'));
 
-            console.log('DEBUG: Prospecting Stage render - masterData.prospectingStages:', masterData.prospectingStages);
-            console.log('DEBUG: Prospecting Stage render - current stage:', prospectingStage);
-            console.log('DEBUG: Prospecting Stage render - masterDataLoaded:', masterDataLoaded);
+            
 
             if (!masterDataLoaded || !masterData.prospectingStages.length) {
               return (
@@ -947,9 +881,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                 ? leadSource.split(',').map(s => s.trim()).filter(Boolean)
                 : [];
 
-            console.log('DEBUG: Lead Source render - masterData.leadSources:', masterData.leadSources);
-            console.log('DEBUG: Lead Source render - selectedValues:', selectedValues);
-            console.log('DEBUG: Lead Source render - masterDataLoaded:', masterDataLoaded);
+            
 
             if (!masterDataLoaded || !masterData.leadSources.length) {
               return <span className="text-sm text-gray-500">Loading...</span>;
@@ -981,7 +913,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                           IsSubContactUpdate: false,
                         });
 
-                        logger.info("LeadSource updated successfully", row.ID, selectedLabels);
+                        
                         // Trigger refresh to update the data
                         refetch?.();
                       }
@@ -1016,9 +948,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                 ? leadType.split(',').map(s => s.trim()).filter(Boolean)
                 : [];
 
-            console.log('DEBUG: Lead Type render - masterData.leadTypes:', masterData.leadTypes);
-            console.log('DEBUG: Lead Type render - selectedValues:', selectedValues);
-            console.log('DEBUG: Lead Type render - masterDataLoaded:', masterDataLoaded);
+            
 
             if (!masterDataLoaded || !masterData.leadTypes.length) {
               return <span className="text-sm text-gray-500">Loading...</span>;
@@ -1049,7 +979,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                           IsSubContactUpdate: false,
                         });
 
-                        logger.info("LeadType updated successfully", row.ID, selectedLabels);
+                        
                         // Trigger refresh to update the data
                         refetch?.();
                       }
@@ -1400,8 +1330,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     }
 
     // If no API config, return minimal columns to avoid conflicts
-    logger.warn('SearchResults: No API column configuration available, using minimal columns');
-    logger.info('SearchResults: Available data keys:', Object.keys(data || {}));
+    
     return [
       {
         id: 'edit',
@@ -1630,19 +1559,19 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                 id="search-results-table"
                 bulkActionContext={searchType === 'opportunities' ? 'products' : 'schedules'}
                 onRowClick={(row) => {
-                  logger.info('Row clicked:', row);
+                  
                 }}
                 onRowDoubleClick={(row) => {
                   window.location.href = `/${searchType}/${row.ID || row.id}`;
                 }}
                 onRowSelect={(selectedRows) => {
-                  logger.info('Selected rows:', selectedRows);
+                  
                 }}
                 onBulkAction={(action, rows) => {
-                  logger.info('Bulk action:', action, rows);
+                  
                 }}
                 onSort={(sortConfig) => {
-                  logger.info('Sort config:', sortConfig);
+                  
                 }}
               />
             </div>
