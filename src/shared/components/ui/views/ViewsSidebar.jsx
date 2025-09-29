@@ -247,6 +247,7 @@ const ViewsSidebar = ({
         if (onColumnOrderChange) {
           onColumnOrderChange(filteredColumns);
         }
+        handleRefetch();
       }
 
       // Step 5: Create view object with updated visible columns for parent component
