@@ -221,9 +221,9 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     const id = row.ID || row.id;
     if (id) {
       if (isOpportunities) {
-        window.location.href = `/edit-opportunity/${id}`;
+        window.location.href = `/edit-opportunity-new/${id}`;
       } else {
-        window.location.href = `/edit-opportunity/${id}`;
+        window.location.href = `/edit-opportunity-new/${id}`;
       }
     }
   };

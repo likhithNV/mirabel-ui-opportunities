@@ -190,7 +190,7 @@ const EditOpportunity: React.FC = () => {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-blue-800">
-                                {isAddMode ? 'Add New Opportunity' : 'Opportunity Details'}
+                              
                             </CardTitle>
                         </CardHeader>
                         <CardContent>

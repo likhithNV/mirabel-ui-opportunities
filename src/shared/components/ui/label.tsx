@@ -10,7 +10,7 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 export const Label: React.FC<LabelProps> = ({
   children,
   required = false,
-  className,
+  className="block text-sm font-medium text-ocean-600",
   ...props
 }) => {
   return (

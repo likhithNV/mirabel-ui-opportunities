@@ -146,7 +146,7 @@ export const useBasicInfoHandlers = (
 
   // Handle stage selection to capture both ID and name
   const handleStageChange = (value) => {
-    const selectedStage = apiStages.find(stage => stage.value === value);
+    const selectedStage = apiStages.find(stage => stage.id === value);
     if (selectedStage) {
       // Update details first, then the required field `stage` to avoid stale validation
       handleInputChange("stageDetails", {
