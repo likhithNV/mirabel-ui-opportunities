@@ -16,9 +16,9 @@ import { getSectionColorClass } from "./sectionColors";
 import FloatingLabelInput from "@/shared/components/ui/FloatingLabelInput";
 import EnhancedPhoneField from "./EnhancedPhoneField";
 import EnhancedZipCodeField from "./EnhancedZipCodeField";
-import EnhancedProposalIdField from "../ProposalsAdvancedSearch/EnhancedProposalIdField";
-import EnhancedProposalNameField from "../ProposalsAdvancedSearch/EnhancedProposalNameField";
-import ProposalEnhancedOpportunityNameField from "../ProposalsAdvancedSearch/ProposalEnhancedOpportunityNameField";
+import EnhancedProposalIdField from "./EnhancedProposalIdField";
+import EnhancedProposalNameField from "./EnhancedProposalNameField";
+import ProposalEnhancedOpportunityNameField from "./ProposalEnhancedOpportunityNameField";
 
 // Helper function to extract values from formatted strings (IE=, SW=, etc.)
 const extractFormattedValues = (formattedValue) => {

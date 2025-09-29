@@ -444,22 +444,6 @@ export const EnhancedFilterBar: FC<EnhancedFilterBarProps> = ({
           )
         })()}
 
-        {onFilterClick && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="bg-ocean-500 text-white hover:bg-ocean-600 h-9 px-4"
-                onClick={onFilterClick}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={5}>
-              Advanced search
-            </TooltipContent>
-          </Tooltip>
-        )}
-
         {onViewsClick && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -477,6 +461,25 @@ export const EnhancedFilterBar: FC<EnhancedFilterBarProps> = ({
             </TooltipContent>
           </Tooltip>
         )}
+
+        {onFilterClick && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="bg-ocean-500 text-white hover:bg-ocean-600 h-9 px-4"
+                onClick={onFilterClick}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={5}>
+              Advanced search
+            </TooltipContent>
+          </Tooltip>
+        )}
+
+
       </div>
       {/* Embedded Settings Panel for default behavior */}
       <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />

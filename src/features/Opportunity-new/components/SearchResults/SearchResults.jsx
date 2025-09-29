@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CardViewNew from './CardViewNew';
 import { EnhancedDataTable } from '@/shared/components/ui/advanced-table';
-import { EnhancedFilterBar } from '@/shared/components/ui/EnhancedFilterBar';
+import { EnhancedFilterBar } from '@/components/ui/EnhancedFilterBar';
 import { useSearchResults } from '../../hooks/useSearchResults';
 import { ExternalLink, MoreVertical, Edit, Check } from 'lucide-react';
 import { OpportunityStatsCards, ProposalStatsCards } from '../Stats';
