@@ -1577,7 +1577,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
           columnOrder={getDefaultColumnOrder()}
           onColumnOrderChange={() => { }}
           onViewSelected={() => { }}
-          pageType="opportunities"
+          pageType={searchType}
           handleRefetch={()=> handleRefetch()}
           // setLoading={setIsLoading}
           />
