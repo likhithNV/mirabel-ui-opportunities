@@ -1,0 +1,31 @@
+.search-results-scroll-container {
+  height: 100%;
+  overflow: auto !important;
+  position: relative;
+}
+
+.search-results-scroll-container .enhanced-data-table {
+  overflow: visible !important;
+  height: auto !important;
+}
+
+.search-results-scroll-container .enhanced-data-table > div {
+  overflow: visible !important;
+}
+
+.search-results-scroll-container .overflow-x-auto {
+  overflow: visible !important;
+}
+
+.search-results-scroll-container table {
+  width: 100% !important;
+}
+
+.search-results-scroll-container thead {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background-color: rgb(243, 244, 246) !important;
+}
+
+

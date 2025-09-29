@@ -15,6 +15,7 @@ import { userServiceNew } from '../../services/userServiceNew';
 import contactsApi from '@/services/contactsApi';
 import { useSearchMasterData } from '../../hooks/useSearchMasterData';
 import { useQuickFilters } from '../../hooks/useQuickFilters';
+import './SearchResults.css';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1404,38 +1405,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
 
   return (
     <>
-      <style>{`
-        .search-results-scroll-container {
-          height: 100%;
-          overflow: auto !important;
-          position: relative;
-        }
-        
-        .search-results-scroll-container .enhanced-data-table {
-          overflow: visible !important;
-          height: auto !important;
-        }
-        
-        .search-results-scroll-container .enhanced-data-table > div {
-          overflow: visible !important;
-        }
-        
-        .search-results-scroll-container .overflow-x-auto {
-          overflow: visible !important;
-        }
-        
-        .search-results-scroll-container table {
-          width: 100% !important;
-        }
-        
-        /* Ensure table header stays visible during scroll */
-        .search-results-scroll-container thead {
-          position: sticky !important;
-          top: 0 !important;
-          z-index: 10 !important;
-          background-color: rgb(243, 244, 246) !important;
-        }
-      `}</style>
       <div className="h-screen bg-gray-50 flex flex-col">
         {/* Statistics Cards: hide in kanban and split views */}
         {(viewMode !== 'split' && viewMode !== 'kanban') && (
