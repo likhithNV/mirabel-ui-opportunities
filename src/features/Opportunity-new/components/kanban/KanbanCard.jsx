@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { getDragId } from "../../utils/kanbanUtils";
+import { useNavigate } from "react-router-dom";
 
 const KanbanCard = ({
   opportunity,
@@ -21,6 +22,7 @@ const KanbanCard = ({
   onEditOpportunity,
   stageColor,
 }) => {
+  const navigate = useNavigate();
   const readPath = (obj, path) => {
     try {
       return path.split('.').reduce((acc, key) => acc?.[key], obj);
@@ -50,10 +52,15 @@ const KanbanCard = ({
   const handleEditOpportunity = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+    if (e && e.nativeEvent && typeof e.nativeEvent.stopImmediatePropagation === 'function') {
+      e.nativeEvent.stopImmediatePropagation();
+    }
+
     const opportunityId = opportunity.id || opportunity.ID;
     if (onEditOpportunity) {
       onEditOpportunity(opportunityId);
+    } else if (opportunityId) {
+      navigate(`/edit-opportunity-new/${opportunityId}`);
     }
   };
 
