@@ -203,6 +203,12 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
 
     
     const columns = [];
+    // Map table column id -> DB column name for server-side sorting
+    if (!generateColumnsFromConfig.colIdToDbName) {
+      generateColumnsFromConfig.colIdToDbName = {};
+    } else {
+      generateColumnsFromConfig.colIdToDbName = {};
+    }
 
     // Add edit column first
     columns.push({
@@ -264,6 +270,10 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
 
       const columnDef = createColumnFromConfig(col);
       if (columnDef) {
+        // Stash DB column name for sorting if available
+        if (col.dbName || col.DBColumnsNames) {
+          generateColumnsFromConfig.colIdToDbName[columnDef.id] = col.dbName || col.DBColumnsNames;
+        }
         
         columns.push(columnDef);
       } else {
@@ -1372,6 +1382,8 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
   };
 
   const columns = getColumns();
+  // Provide a stable reference to column id->DB name map built during column generation
+  const colIdToDbName = (generateColumnsFromConfig.colIdToDbName || {});
 
   // Prepare stats data from OpportunityResult array
   const opportunityResult = data?.opportunityResult || {};
@@ -1525,7 +1537,22 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                   
                 }}
                 onSort={(sortConfig) => {
-                  
+                  // Build server-side SortBy using provided directions exactly
+                  if (!Array.isArray(sortConfig) || sortConfig.length === 0) {
+                    setPage(1);
+                    refetch({ ...buildQuickParams(), CurPage: 1, SortBy: undefined });
+                    return;
+                  }
+                  const parts = [];
+                  for (const s of sortConfig) {
+                    const db = colIdToDbName[s.columnId];
+                    if (!db) continue;
+                    const dir = (s.direction === 'desc' ? 'DESC' : 'ASC');
+                    parts.push(`[${db}] ${dir}`);
+                  }
+                  setPage(1);
+                  const qp = buildQuickParams();
+                  refetch({ ...qp, SortBy: parts.join(', '), CurPage: 1 });
                 }}
               />
             </div>
