@@ -1,15 +1,21 @@
-
 import React, { useState, useEffect } from "react";
 import FloatingLabelInput from "@/shared/components/ui/FloatingLabelInput";
 import MultiSelectDropdown from "@/components/ui/MultiSelectDropdown";
-import { userService } from "@/features/Opportunity/Services/userService";
-import AutocompleteSelect from "../../../../components/shared/AutocompleteSelect";
+import { userService } from "../../services/userService";
+import AutocompleteSelect from "@/components/shared/AutocompleteSelect";
 import { getAutocompleteValue } from "@OpportunityUtils/searchUtils";
 import EnhancedOpportunityNameField from "./EnhancedOpportunityNameField";
 
-const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams = {} }) => {
-  console.log('BasicSearchFields - searchParams:', searchParams);
-  console.log('BasicSearchFields - primaryCampaign value:', searchParams.primaryCampaign);
+const BasicSearchFields = ({
+  handleInputChange,
+  handleSelectChange,
+  searchParams = {},
+}) => {
+  console.log("BasicSearchFields - searchParams:", searchParams);
+  console.log(
+    "BasicSearchFields - primaryCampaign value:",
+    searchParams.primaryCampaign
+  );
   const [opportunityCreators, setOpportunityCreators] = useState([]);
   const [isLoadingCreators, setIsLoadingCreators] = useState(true);
   const [businessUnits, setBusinessUnits] = useState([]);
@@ -21,7 +27,8 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
   const [assignedReps, setAssignedReps] = useState([]);
   const [isLoadingAssignedReps, setIsLoadingAssignedReps] = useState(true);
   const [salesPresenters, setSalesPresenters] = useState([]);
-  const [isLoadingSalesPresenters, setIsLoadingSalesPresenters] = useState(true);
+  const [isLoadingSalesPresenters, setIsLoadingSalesPresenters] =
+    useState(true);
 
   useEffect(() => {
     const fetchOpportunityCreators = async () => {
@@ -30,7 +37,7 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
         const creators = await userService.getOpportunityCreators();
         setOpportunityCreators(creators);
       } catch (error) {
-        console.error('Failed to fetch opportunity creators:', error);
+        console.error("Failed to fetch opportunity creators:", error);
         // Set empty array on error
         setOpportunityCreators([]);
       } finally {
@@ -44,7 +51,7 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
         const units = await userService.getBusinessUnits();
         setBusinessUnits(units);
       } catch (error) {
-        console.error('Failed to fetch business units:', error);
+        console.error("Failed to fetch business units:", error);
         // Set empty array on error
         setBusinessUnits([]);
       } finally {
@@ -58,7 +65,7 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
         const productsList = await userService.getProducts();
         setProducts(productsList);
       } catch (error) {
-        console.error('Failed to fetch products:', error);
+        console.error("Failed to fetch products:", error);
         // Set empty array on error
         setProducts([]);
       } finally {
@@ -72,7 +79,7 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
         const campaignsList = await userService.getCampaigns();
         setCampaigns(campaignsList);
       } catch (error) {
-        console.error('Failed to fetch campaigns:', error);
+        console.error("Failed to fetch campaigns:", error);
         // Set empty array on error
         setCampaigns([]);
       } finally {
@@ -86,7 +93,7 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
         const reps = await userService.getOpportunityCreators();
         setAssignedReps(reps);
       } catch (error) {
-        console.error('Failed to fetch assigned reps:', error);
+        console.error("Failed to fetch assigned reps:", error);
         // Set empty array on error
         setAssignedReps([]);
       } finally {
@@ -100,7 +107,7 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
         const presenters = await userService.getOpportunityCreators();
         setSalesPresenters(presenters);
       } catch (error) {
-        console.error('Failed to fetch sales presenters:', error);
+        console.error("Failed to fetch sales presenters:", error);
         // Set empty array on error
         setSalesPresenters([]);
       } finally {
@@ -138,7 +145,13 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
           <div className="col-span-12 sm:col-span-5">
             <EnhancedOpportunityNameField
               label="Opportunity Name"
-              value={Array.isArray(searchParams.opportunityNameBasic) ? searchParams.opportunityNameBasic : (searchParams.opportunityNameBasic ? [searchParams.opportunityNameBasic] : [])}
+              value={
+                Array.isArray(searchParams.opportunityNameBasic)
+                  ? searchParams.opportunityNameBasic
+                  : searchParams.opportunityNameBasic
+                  ? [searchParams.opportunityNameBasic]
+                  : []
+              }
               onChange={handleMultiSelectChange("opportunityName")}
               placeholder="Type opportunity name or select option..."
             />
@@ -147,10 +160,18 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
             <MultiSelectDropdown
               id="created-rep"
               label="Opportunity Creator"
-              value={Array.isArray(searchParams.createdRep) ? searchParams.createdRep : (searchParams.createdRep ? [searchParams.createdRep] : [])}
+              value={
+                Array.isArray(searchParams.createdRep)
+                  ? searchParams.createdRep
+                  : searchParams.createdRep
+                  ? [searchParams.createdRep]
+                  : []
+              }
               onChange={handleMultiSelectChange("createdRep")}
               options={opportunityCreators}
-              placeholder={isLoadingCreators ? "Loading creators..." : "Select creator"}
+              placeholder={
+                isLoadingCreators ? "Loading creators..." : "Select creator"
+              }
               disabled={isLoadingCreators}
             />
           </div>
@@ -158,10 +179,20 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
             <MultiSelectDropdown
               id="business-unit"
               label="Business Unit"
-              value={Array.isArray(searchParams.businessUnit) ? searchParams.businessUnit : (searchParams.businessUnit ? [searchParams.businessUnit] : [])}
+              value={
+                Array.isArray(searchParams.businessUnit)
+                  ? searchParams.businessUnit
+                  : searchParams.businessUnit
+                  ? [searchParams.businessUnit]
+                  : []
+              }
               onChange={handleMultiSelectChange("businessUnit")}
               options={businessUnits}
-              placeholder={isLoadingBusinessUnits ? "Loading business units..." : "Select business unit"}
+              placeholder={
+                isLoadingBusinessUnits
+                  ? "Loading business units..."
+                  : "Select business unit"
+              }
               disabled={isLoadingBusinessUnits}
             />
           </div>
@@ -173,18 +204,32 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
             <MultiSelectDropdown
               id="product"
               label="Product"
-              value={Array.isArray(searchParams.product) ? searchParams.product : (searchParams.product ? [searchParams.product] : [])}
+              value={
+                Array.isArray(searchParams.product)
+                  ? searchParams.product
+                  : searchParams.product
+                  ? [searchParams.product]
+                  : []
+              }
               onChange={handleMultiSelectChange("product")}
               options={products}
-              placeholder={isLoadingProducts ? "Loading products..." : "Select product"}
+              placeholder={
+                isLoadingProducts ? "Loading products..." : "Select product"
+              }
               disabled={isLoadingProducts}
             />
           </div>
           <div className="col-span-12 sm:col-span-5">
             <AutocompleteSelect
               label="Company Name"
-              value={Array.isArray(searchParams.companyNameBasic) ? searchParams.companyNameBasic : getAutocompleteValue(searchParams.companyNameBasic)}
-              onChange={(values) => handleSelectFieldChange("companyNameBasic")(values.join(','))}
+              value={
+                Array.isArray(searchParams.companyNameBasic)
+                  ? searchParams.companyNameBasic
+                  : getAutocompleteValue(searchParams.companyNameBasic)
+              }
+              onChange={(values) =>
+                handleSelectFieldChange("companyNameBasic")(values.join(","))
+              }
               placeholder="Type to search companies..."
               className="w-full"
             />
@@ -193,10 +238,20 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
             <MultiSelectDropdown
               id="sales-presenter"
               label="Sales Presenter"
-              value={Array.isArray(searchParams.salesPresenter) ? searchParams.salesPresenter : (searchParams.salesPresenter ? [searchParams.salesPresenter] : [])}
+              value={
+                Array.isArray(searchParams.salesPresenter)
+                  ? searchParams.salesPresenter
+                  : searchParams.salesPresenter
+                  ? [searchParams.salesPresenter]
+                  : []
+              }
               onChange={handleMultiSelectChange("salesPresenter")}
               options={salesPresenters}
-              placeholder={isLoadingSalesPresenters ? "Loading presenters..." : "Select presenter"}
+              placeholder={
+                isLoadingSalesPresenters
+                  ? "Loading presenters..."
+                  : "Select presenter"
+              }
               disabled={isLoadingSalesPresenters}
             />
           </div>
@@ -208,10 +263,18 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
             <MultiSelectDropdown
               id="assigned-rep"
               label="Assigned Rep"
-              value={Array.isArray(searchParams.assignedRep) ? searchParams.assignedRep : (searchParams.assignedRep ? [searchParams.assignedRep] : [])}
+              value={
+                Array.isArray(searchParams.assignedRep)
+                  ? searchParams.assignedRep
+                  : searchParams.assignedRep
+                  ? [searchParams.assignedRep]
+                  : []
+              }
               onChange={handleMultiSelectChange("assignedRep")}
               options={assignedReps}
-              placeholder={isLoadingAssignedReps ? "Loading reps..." : "Select rep"}
+              placeholder={
+                isLoadingAssignedReps ? "Loading reps..." : "Select rep"
+              }
               disabled={isLoadingAssignedReps}
             />
           </div>
@@ -219,10 +282,18 @@ const BasicSearchFields = ({ handleInputChange, handleSelectChange, searchParams
             <MultiSelectDropdown
               id="primary-campaign"
               label="Primary Campaign Source"
-              value={Array.isArray(searchParams.primaryCampaign) ? searchParams.primaryCampaign : (searchParams.primaryCampaign ? [searchParams.primaryCampaign] : [])}
+              value={
+                Array.isArray(searchParams.primaryCampaign)
+                  ? searchParams.primaryCampaign
+                  : searchParams.primaryCampaign
+                  ? [searchParams.primaryCampaign]
+                  : []
+              }
               onChange={handleMultiSelectChange("primaryCampaign")}
               options={campaigns}
-              placeholder={isLoadingCampaigns ? "Loading campaigns..." : "Select campaign"}
+              placeholder={
+                isLoadingCampaigns ? "Loading campaigns..." : "Select campaign"
+              }
               disabled={isLoadingCampaigns}
             />
           </div>

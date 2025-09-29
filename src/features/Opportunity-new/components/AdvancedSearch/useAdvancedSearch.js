@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useOpportunitySearch } from "@OpportunityContexts/OpportunitySearchContext";
 import { useProposalSearch } from "@OpportunityContexts/ProposalSearchContext";
 import { buildSearchJson, getSearchSummary, validateSearchJson } from "../../utils/searchJsonBuilder";
-import { userService } from "../../Services/userService";
+import { userService } from "../../services/userService";
 
 export const useOpportunityAdvancedSearch = () => {
   const [openAccordions, setOpenAccordions] = useState(["primary-fields"]);

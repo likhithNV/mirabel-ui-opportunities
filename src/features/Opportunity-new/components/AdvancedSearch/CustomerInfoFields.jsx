@@ -1,12 +1,15 @@
-
 import React from "react";
 import FloatingLabelInput from "@/shared/components/ui/FloatingLabelInput";
 import MultiSelectDropdown from "@/components/ui/MultiSelectDropdown";
 import { OPPORTUNITY_OPTIONS } from "@OpportunityConstants/opportunityOptions";
-import AutocompleteSelect from "../../../../components/shared/AutocompleteSelect";
+import AutocompleteSelect from "@/components/shared/AutocompleteSelect";
 import { getAutocompleteValue } from "@OpportunityUtils/searchUtils";
 
-const CustomerInfoFields = ({ handleInputChange, handleSelectChange, searchParams = {} }) => {
+const CustomerInfoFields = ({
+  handleInputChange,
+  handleSelectChange,
+  searchParams = {},
+}) => {
   const handleFieldChange = (field) => (value) => {
     handleInputChange({ target: { name: field, value } });
   };
@@ -22,8 +25,14 @@ const CustomerInfoFields = ({ handleInputChange, handleSelectChange, searchParam
         <div className="col-span-12 sm:col-span-5 space-y-2">
           <AutocompleteSelect
             label="Company Name"
-            value={Array.isArray(searchParams.companyName) ? searchParams.companyName : getAutocompleteValue(searchParams.companyName)}
-            onChange={(values) => handleSelectFieldChange("companyName")(values.join(','))}
+            value={
+              Array.isArray(searchParams.companyName)
+                ? searchParams.companyName
+                : getAutocompleteValue(searchParams.companyName)
+            }
+            onChange={(values) =>
+              handleSelectFieldChange("companyName")(values.join(","))
+            }
             placeholder="Type to search companies..."
             className="w-full"
           />
@@ -32,9 +41,46 @@ const CustomerInfoFields = ({ handleInputChange, handleSelectChange, searchParam
           <MultiSelectDropdown
             id="industry"
             label="Industry"
-            value={Array.isArray(searchParams.industry) ? searchParams.industry : (searchParams.industry ? [searchParams.industry] : [])}
+            value={
+              Array.isArray(searchParams.industry)
+                ? searchParams.industry
+                : searchParams.industry
+                ? [searchParams.industry]
+                : []
+            }
             onChange={handleSelectFieldChange("industry")}
-            options={["Technology", "Software", "Healthcare", "Finance", "Banking", "Insurance", "Manufacturing", "Automotive", "Retail", "E-commerce", "Education", "Government", "Non-profit", "Real Estate", "Construction", "Energy", "Utilities", "Telecommunications", "Media", "Entertainment", "Transportation", "Logistics", "Agriculture", "Hospitality", "Food & Beverage", "Pharmaceutical", "Biotechnology", "Legal Services", "Consulting", "Other"].map(opt => ({ value: opt, label: opt }))}
+            options={[
+              "Technology",
+              "Software",
+              "Healthcare",
+              "Finance",
+              "Banking",
+              "Insurance",
+              "Manufacturing",
+              "Automotive",
+              "Retail",
+              "E-commerce",
+              "Education",
+              "Government",
+              "Non-profit",
+              "Real Estate",
+              "Construction",
+              "Energy",
+              "Utilities",
+              "Telecommunications",
+              "Media",
+              "Entertainment",
+              "Transportation",
+              "Logistics",
+              "Agriculture",
+              "Hospitality",
+              "Food & Beverage",
+              "Pharmaceutical",
+              "Biotechnology",
+              "Legal Services",
+              "Consulting",
+              "Other",
+            ].map((opt) => ({ value: opt, label: opt }))}
             placeholder="Select industry"
           />
         </div>
@@ -47,14 +93,20 @@ const CustomerInfoFields = ({ handleInputChange, handleSelectChange, searchParam
           />
         </div>
       </div>
-      
+
       {/* Row 2 - Company Size and Personnel - optimized for different field types */}
       <div className="grid grid-cols-12 gap-3">
         <div className="col-span-12 sm:col-span-3 space-y-2">
           <MultiSelectDropdown
             id="company-size"
             label="Company Size"
-            value={Array.isArray(searchParams.companySize) ? searchParams.companySize : (searchParams.companySize ? [searchParams.companySize] : [])}
+            value={
+              Array.isArray(searchParams.companySize)
+                ? searchParams.companySize
+                : searchParams.companySize
+                ? [searchParams.companySize]
+                : []
+            }
             onChange={handleSelectFieldChange("companySize")}
             options={OPPORTUNITY_OPTIONS.companySize}
             placeholder="Select size"
@@ -81,7 +133,13 @@ const CustomerInfoFields = ({ handleInputChange, handleSelectChange, searchParam
           <MultiSelectDropdown
             id="timeframe"
             label="Timeframe"
-            value={Array.isArray(searchParams.timeframe) ? searchParams.timeframe : (searchParams.timeframe ? [searchParams.timeframe] : [])}
+            value={
+              Array.isArray(searchParams.timeframe)
+                ? searchParams.timeframe
+                : searchParams.timeframe
+                ? [searchParams.timeframe]
+                : []
+            }
             onChange={handleSelectFieldChange("timeframe")}
             options={OPPORTUNITY_OPTIONS.timeframe}
             placeholder="Select timeframe"
@@ -103,7 +161,13 @@ const CustomerInfoFields = ({ handleInputChange, handleSelectChange, searchParam
           <MultiSelectDropdown
             id="current-solution"
             label="Current Solution"
-            value={Array.isArray(searchParams.currentSolution) ? searchParams.currentSolution : (searchParams.currentSolution ? [searchParams.currentSolution] : [])}
+            value={
+              Array.isArray(searchParams.currentSolution)
+                ? searchParams.currentSolution
+                : searchParams.currentSolution
+                ? [searchParams.currentSolution]
+                : []
+            }
             onChange={handleSelectFieldChange("currentSolution")}
             options={OPPORTUNITY_OPTIONS.solution}
             placeholder="Select solution"

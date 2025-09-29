@@ -422,7 +422,7 @@ export const EnhancedFilterBar: FC<EnhancedFilterBarProps> = ({
               {visibleViews.map((view, index) => {
                 const IconComponent = view.icon
                 return (
-                  <Tooltip>
+                  <Tooltip key={view.key}>
                     <TooltipTrigger asChild>
                       <Button
                         key={view.key}

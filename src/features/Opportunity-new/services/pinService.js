@@ -36,24 +36,31 @@ class PinService {
 
       // Check response structure - be flexible with different response formats
       const responseData = response?.data;
-      const isSuccess = response?.status === 200 || 
-                       responseData?.content?.Status === "Success" ||
-                       responseData?.Status === "Success" ||
-                       responseData?.success === true;
+      console.log('PinService: API Response:', {
+        status: response?.status,
+        responseData: responseData,
+        activityId,
+        currentPinState
+      });
+
+      const isSuccess = response?.status === 200 ||
+        responseData?.content?.Status === "Success" ||
+        responseData?.Status === "Success" ||
+        responseData?.success === true;
 
       if (isSuccess) {
         // Try to get the new pin state from response, otherwise assume toggle
-        const newPinState = responseData?.content?.Data?.IsPinned !== undefined 
-          ? responseData.content.Data.IsPinned 
-          : responseData?.Data?.IsPinned !== undefined 
-          ? responseData.Data.IsPinned 
-          : responseData?.IsPinned !== undefined 
-          ? responseData.IsPinned 
-          : !currentPinState; // Fallback to toggle assumption
-        
+        const newPinState = responseData?.content?.Data?.IsPinned !== undefined
+          ? responseData.content.Data.IsPinned
+          : responseData?.Data?.IsPinned !== undefined
+            ? responseData.Data.IsPinned
+            : responseData?.IsPinned !== undefined
+              ? responseData.IsPinned
+              : !currentPinState; // Fallback to toggle assumption
+
         // Update cache
         this.setCachedPinState(activityId, newPinState);
-        
+
         console.log('PinService: Pin toggle successful:', {
           activityId,
           currentPinState,
@@ -64,15 +71,15 @@ class PinService {
         return {
           success: true,
           newPinState: newPinState,
-          message: responseData?.content?.Message || 
-                  responseData?.Message || 
-                  `Activity ${newPinState ? 'pinned' : 'unpinned'} successfully`,
+          message: responseData?.content?.Message ||
+            responseData?.Message ||
+            `Activity ${newPinState ? 'pinned' : 'unpinned'} successfully`,
           data: responseData?.content?.Data || responseData?.Data
         };
       } else {
         throw new Error(
-          responseData?.content?.Message || 
-          responseData?.Message || 
+          responseData?.content?.Message ||
+          responseData?.Message ||
           responseData?.error ||
           'Failed to update pin status'
         );
@@ -121,8 +128,8 @@ class PinService {
 
     for (let i = 0; i < activityUpdates.length; i += batchSize) {
       const batch = activityUpdates.slice(i, i + batchSize);
-      
-      const batchPromises = batch.map(update => 
+
+      const batchPromises = batch.map(update =>
         this.togglePinStatus(update.activityId, update.currentState, update.activityCategory)
           .then(result => ({
             activityId: update.activityId,
@@ -224,7 +231,7 @@ class PinService {
       };
 
       console.log('PinService: Tracking pin action:', trackingData);
-      
+
       // Example: Send to analytics service
       // analyticsService.track(trackingData);
     } catch (error) {

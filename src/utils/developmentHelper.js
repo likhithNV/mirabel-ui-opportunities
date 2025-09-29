@@ -2,18 +2,20 @@
 
 // Development API Configuration - Core credentials for API calls
 export const devApiConfig = {
-    "baseUrl": "https://dev-app.magazinemanager.com/",
-    "domain": "dev-app",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dnZWRJblVzZXJJRCI6IjEiLCJMb2dnZWRJblNpdGVDbGllbnRJRCI6Ijk5ODYiLCJMb2dnZWRJblNpdGVDdWx0dXJlVUkiOiJlbi1VUyIsIkRhdGVUaW1lIjoiOS8yMi8yMDI1IDE6NDk6MzEgUE0iLCJMb2dnZWRJblNpdGVDdXJyZW5jeVN5bWJvbCI6IiIsIkxvZ2dlZEluU2l0ZURhdGVGb3JtYXQiOiIiLCJEb21haW4iOiJkZXYtYXBwIiwiTG9nZ2VkSW5TaXRlVGltZUFkZCI6WyIwIiwiMCJdLCJTb3VyY2UiOiJUTU0iLCJFbWFpbCI6InNhQG1hZ2F6aW5lbWFuYWdlci5jb20iLCJJc0FQSVVzZXIiOiJGYWxzZSIsIkV4dGVybmFsQXV0aCI6IjNCWklUU3dkNEdoc1d1RUllaGVuM0pvR1otMkxSUnJyNnpXR0VWTmlkY3R0aSIsIm5iZiI6MTc1ODU0ODk3MSwiZXhwIjoxNzYzOTQ4OTcxLCJpYXQiOjE3NTg1NDg5NzEsImlzcyI6Ik1hZ2F6aW5lTWFuYWdlciIsImF1ZCI6IioifQ.I5PF1hftkOct15TAk3YK806QTabzSnxWMpuzguvzdPw"
+    "baseUrl": "https://tsqb.magazinemanager.com/",
+    "domain": "tsqb",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dnZWRJblVzZXJJRCI6IjIxMjciLCJMb2dnZWRJblNpdGVDbGllbnRJRCI6IjEwMjciLCJMb2dnZWRJblNpdGVDdWx0dXJlVUkiOiJlbi1VUyIsIkRhdGVUaW1lIjoiOS8yOS8yMDI1IDY6Mjc6NDYgUE0iLCJMb2dnZWRJblNpdGVDdXJyZW5jeVN5bWJvbCI6IiQiLCJMb2dnZWRJblNpdGVEYXRlRm9ybWF0IjoiIiwiRG9tYWluIjoidHNxYiIsIkxvZ2dlZEluU2l0ZVRpbWVBZGQiOlsiLTEyMCIsIi0xMjAiXSwiU291cmNlIjoiVE1NIiwiRW1haWwiOiJudmxpa2l0aEBtaXJhYmVsdGVjaG5vbG9naWVzLmNvbSIsIklzQVBJVXNlciI6IkZhbHNlIiwiRXh0ZXJuYWxBdXRoIjoiIiwibmJmIjoxNzU5MTcwNDY2LCJleHAiOjE3NTkxNzIyNjYsImlhdCI6MTc1OTE3MDQ2NiwiaXNzIjoiTWFnYXppbmVNYW5hZ2VyIiwiYXVkIjoiKiJ9.bWvmNznN33AixdjKk59ta2bl0zW1mnV2k7yMk1J--bw"
 };
+
+// Alternative development config (commented out)
 // export const devApiConfig = {
-//     "baseUrl":  "http://localhost",
+//     "baseUrl": "http://localhost",
 //     "domain": "localhost",
-//     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJMb2dnZWRJblVzZXJJRCI6IjEiLCJMb2dnZWRJblNpdGVDbGllbnRJRCI6Ijk5MjAiLCJMb2dnZWRJblNpdGVDdWx0dXJlVUkiOiJlbi11cyIsIkRhdGVUaW1lIjoiMzEtMDctMjAyNSAxMTo0OTowNSIsIkxvZ2dlZEluU2l0ZUN1cnJlbmN5U3ltYm9sIjoiIiwiTG9nZ2VkSW5TaXRlRGF0ZUZvcm1hdCI6IiIsIkRvbWFpbiI6ImxvY2FsaG9zdCIsIkxvZ2dlZEluU2l0ZVRpbWVBZGQiOlsiMCIsIjAiXSwiU291cmNlIjoiVE1NIiwiRW1haWwiOiJzYUBtYWdhemluZW1hbmFnZXIuY29tIiwiSXNBUElVc2VyIjoiRmFsc2UiLCJuYmYiOjE3NTM5NjI1NDUsImV4cCI6MTc1Njk2MjU0NSwiaWF0IjoxNzUzOTYyNTQ1LCJpc3MiOiJNYWdhemluZU1hbmFnZXIiLCJhdWQiOiIqIn0.oYMUH3ttGycmsJxUPZkc57kx-DEKbxuaZl4C_ipTPV8"
+//     "token": "eyJhbGciOiJIUzINiIsInR5cCI6IkpXVCJ9.eyJMb2dnZWRJBlVzZXJJRCI6IjEiLCJMb2dnZWRJBlNpdGVDbGllbnRJRCI6Ijk5MjAiLCJMb2dnZWRJBlNpdGVDdWx0dXJlVUkiOiJlbi11cyIsIkRhdGVUaW1lIjoiMzEtMDctMjAyNSAxMTo0OTowNSIsIkxvZ2dlZWRJBlNpdGVDdXJyZW5jeVN5bWJvbCI6IiIsIkxvZ2dlZWRJBlNpdGVEYXRlRm9ybWF0IjoiIiwiRG9tYWluIjoibG9jYWxob3N0IiwiTG9nZ2VkSW5TaXRlVGltZUFkZCI6WyIwIiwiMCJdLCJTb3VyY2UiOiJUTU0iLCJFbWFpbCI6InNhQG1hZ2F6aW5lbWFuYWdlci5jb20iLCJJc0FQSVVzZXIiOiJGYWxzZSIsIm5iZiI6MTc1Mzk2MjU0NSwiZXhwIjoxNzU2OTYyNTQ1LCJpYXQiOjE3NTM5NjI1NDUsImlzcyI6Ik1hZ2F6aW5lTWFuYWdlciIsImF1ZCI6IioifQ.oYMUH3ttGycmsJxUPZkc57kx-DEKbxuaZl4C_ipTPV8"
 // };
 
 // Development URL (legacy compatibility)
-export const devURL = devApiConfig.Host;
+export const devURL = devApiConfig.baseUrl;
 
 // Promise management for iframe communication
 export const promises = {};
@@ -22,6 +24,7 @@ export const promises = {};
 export const getValue = () => {
     return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 };
+
 // Development session values - references devApiConfig
 export const sessionValues = {
     // Core API credentials - referenced from devApiConfig
@@ -77,7 +80,6 @@ export const sessionValues = {
     "ContentVersion": null
 };
 
-
 // Message handler for iframe communication
 export const handleMessage = (event) => {
     try {
@@ -97,7 +99,6 @@ export const handleMessage = (event) => {
         }
 
         if (data && data.type === 'MM_API_RESPONSE') {
-
             // Handle different types of responses
             if (data.method === 'login' || data.method === 'auth') {
                 // Update session with real authentication data
@@ -132,4 +133,3 @@ export const initializeDevelopmentEnvironment = () => {
         console.log('✅ Development session initialized');
     }
 };
-

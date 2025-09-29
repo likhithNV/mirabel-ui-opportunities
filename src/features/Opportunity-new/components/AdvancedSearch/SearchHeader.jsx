@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/shared/components/ui/button";
-import { Toggle } from "../../../../components/ui/toggle";
+import { Toggle } from "@/components/ui/toggle";
 import {
   Search,
   Maximize2,
@@ -96,7 +96,9 @@ const SearchHeader = ({
 
             {/* Settings Button */}
             <Button
-              onClick={() => (onOpenSettings ? onOpenSettings() : setIsSettingsOpen(true))}
+              onClick={() =>
+                onOpenSettings ? onOpenSettings() : setIsSettingsOpen(true)
+              }
               variant="outline"
               className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg"
             >
@@ -115,7 +117,10 @@ const SearchHeader = ({
           </div>
         </div>
       </div>
-      <SettingsPanel isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsPanel
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 };

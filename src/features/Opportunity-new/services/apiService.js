@@ -21,7 +21,7 @@ class ApiService {
 
 
   get userId() {
-    return Session.UserID;
+    return session.UserID;
   }
 
   get userInfo() {
@@ -40,7 +40,7 @@ class ApiService {
 
   async get(endpoint, params = {}) {
     const response = await this.httpClient.get(endpoint, { params });
-   
+
     return response;
   }
 
@@ -97,6 +97,10 @@ class ApiService {
 
   async getEmailActivities(contactId) {
     return activitiesApi.getEmailActivities(contactId);
+  }
+
+  async getActivityTypes() {
+    return activitiesApi.getActivityTypes();
   }
 
   // Admin methods

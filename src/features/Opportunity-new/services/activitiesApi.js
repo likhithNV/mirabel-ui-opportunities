@@ -1,6 +1,6 @@
 import axiosService from '@/services/axiosService.js';
 import { getCurrentUserId } from '@/utils/userUtils';
-import { 
+import {
   ACTIVITY_TYPES,
   ACTIVITY_SOURCE_TYPES,
   API_CONFIG,
@@ -14,7 +14,6 @@ const axiosInstance = axiosService;
 class ActivitiesApi {
   // Method for fetching activities
   async getActivities(contactId) {
-    console.log('Fetching activities for contact ID:', contactId);
     const payload = {
       ActivityType: ACTIVITY_TYPES.ALL,
       LimitChars: API_CONFIG.LIMIT_CHARS,
@@ -41,13 +40,12 @@ class ActivitiesApi {
     };
 
     const response = await axiosInstance.post(API_ENDPOINTS.ACTIVITIES, payload);
-  
+
     return response;
   }
 
   // Method for fetching meeting activities with ActivityType 3
   async getMeetingActivities(contactId) {
-    console.log('ActivitiesApi: Fetching meeting activities for contact ID:', contactId);
     const payload = {
       ActivityType: ACTIVITY_TYPES.MEETINGS,
       LimitChars: API_CONFIG.LIMIT_CHARS,
@@ -59,13 +57,11 @@ class ActivitiesApi {
     };
 
     const response = await axiosInstance.post(API_ENDPOINTS.ACTIVITIES, payload);
-    console.log('ActivitiesApi: Meeting activities response:', response);
     return response;
   }
 
   // Method for fetching notes-specific activities
   async getNotesActivities(contactId) {
-    console.log('Fetching notes activities for contact ID:', contactId);
     const payload = {
       ActivityType: ACTIVITY_TYPES.NOTES,
       LimitChars: API_CONFIG.LIMIT_CHARS,
@@ -80,7 +76,6 @@ class ActivitiesApi {
 
   // Method for fetching email activities with ActivityType 7
   async getEmailActivities(contactId) {
-    console.log('ActivitiesApi: Fetching email activities for contact ID:', contactId);
     const payload = {
       ActivityType: ACTIVITY_TYPES.EMAILS,
       LimitChars: API_CONFIG.LIMIT_CHARS,
@@ -91,21 +86,22 @@ class ActivitiesApi {
       IsPinned: false
     };
 
-    console.log('ActivitiesApi: Email activities payload:', payload);
     const response = await axiosInstance.post(API_ENDPOINTS.ACTIVITIES, payload);
-    console.log('ActivitiesApi: Email activities response:', response);
     return response;
   }
 
   // Method for toggling pin status (single endpoint for both pin/unpin)
   async togglePinActivity(activityID, activityCategory = 'Activity') {
-    console.log('ActivitiesApi: Toggling pin for activity with ID:', activityID, 'Category:', activityCategory);
-    
     // Use 'Activity' as the default category since that's what the endpoint expects
     const categoryValue = activityCategory === 'Activity' ? 'Activity' : 'Activity';
     const response = await axiosInstance.get(`${API_ENDPOINTS.PIN_ACTIVITY}/${activityID}/${categoryValue}`);
-    
-    console.log('ActivitiesApi: Toggle pin activity response:', response);
+
+    return response;
+  }
+
+  // Method for fetching activity types
+  async getActivityTypes() {
+    const response = await axiosInstance.get('/services/Activities/GetActivityTypes');
     return response;
   }
 

@@ -6,10 +6,10 @@ import {
   AccordionTrigger,
 } from "@/shared/components/ui/accordion";
 import MultiSelectDropdown from "@/components/ui/MultiSelectDropdown";
-import AutocompleteSelect from "../../../../components/shared/AutocompleteSelect";
+import AutocompleteSelect from "@/components/shared/AutocompleteSelect";
 import EnhancedOpportunityNameField from "./EnhancedOpportunityNameField";
 
-import { userService } from "@/features/Opportunity/Services/userService";
+import { userService } from "../../services/userService";
 import { getAutocompleteValue } from "@OpportunityUtils/searchUtils";
 import FloatingLabelSelect from "@/shared/components/ui/FloatingLabelSelect";
 import { getSectionColorClass } from "./sectionColors";
@@ -219,7 +219,7 @@ const DynamicFormRenderer = ({
           className={gridCols || "col-span-12 sm:col-span-4"}
         >
           <EnhancedOpportunityNameField
-            label={label+'test'}
+            label={label + "test"}
             value={Array.isArray(value) ? value : value ? [value] : []}
             onChange={handleMultiSelectChange(fieldName)}
             placeholder={placeholder}
@@ -313,16 +313,24 @@ const DynamicFormRenderer = ({
       // Determine type and placeholder based on field name
       let autocompleteType = type || "company";
       let autocompletePlaceholder = placeholder;
-      
+
       // Check if field is email-related
-      if (fieldName.toLowerCase().includes("email") || fieldName.toLowerCase().includes("contactemail")) {
+      if (
+        fieldName.toLowerCase().includes("email") ||
+        fieldName.toLowerCase().includes("contactemail")
+      ) {
         autocompleteType = "email";
-        autocompletePlaceholder = autocompletePlaceholder || "Type to search emails...";
-      } else if (fieldName.toLowerCase().includes("company") || fieldName.toLowerCase().includes("customername")) {
+        autocompletePlaceholder =
+          autocompletePlaceholder || "Type to search emails...";
+      } else if (
+        fieldName.toLowerCase().includes("company") ||
+        fieldName.toLowerCase().includes("customername")
+      ) {
         autocompleteType = "company";
-        autocompletePlaceholder = autocompletePlaceholder || "Type to search companies...";
+        autocompletePlaceholder =
+          autocompletePlaceholder || "Type to search companies...";
       }
-      
+
       return (
         <div
           key={fieldName}
@@ -547,7 +555,7 @@ const DynamicFormRenderer = ({
               <AccordionContent className="px-0 pb-3">
                 {renderSection(section)}
               </AccordionContent>
-              
+
               {/* Horizontal Separator (except for last section) */}
               {index < config.sections.length - 1 && (
                 <hr className="border-gray-200 my-3" />
