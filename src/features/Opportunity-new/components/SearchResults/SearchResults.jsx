@@ -120,11 +120,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     e.stopPropagation();
     const id = row.ID || row.id;
     if (id) {
-      if (isOpportunities) {
-        window.location.href = `/edit-opportunity/${id}`;
-      } else {
-        window.location.href = `/edit-proposal/${id}`;
-      }
+        window.location.href = `/edit-opportunity-new/${id}`;
     }
   };
 
