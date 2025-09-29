@@ -195,7 +195,7 @@ const EditOpportunity: React.FC<EditOpportunityProps> = ({ overrideId }) => {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-blue-800">
-                                {isAddMode ? 'Add New Opportunity' : 'Opportunity Details'}
+                              
                             </CardTitle>
                         </CardHeader>
                         <CardContent>

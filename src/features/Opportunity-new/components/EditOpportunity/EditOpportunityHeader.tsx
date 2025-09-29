@@ -70,9 +70,9 @@ const EditOpportunityHeader: React.FC<EditOpportunityHeaderProps> = ({
           <Button
             onClick={onSave}
             disabled={isSaving || hasValidationErrors()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-4 w-4 px-1" />
             {isSaving ? 'Saving...' : isAddMode ? 'Create Opportunity' : 'Save Changes'}
           </Button>
         </div>
