@@ -136,11 +136,7 @@ const SearchResults = ({
     e.stopPropagation();
     const id = row.ID || row.id;
     if (id) {
-      if (isOpportunities) {
-        window.location.href = `/edit-opportunity/${id}`;
-      } else {
-        window.location.href = `/edit-proposal/${id}`;
-      }
+        window.location.href = `/edit-opportunity-new/${id}`;
     }
   };
 
@@ -224,6 +220,12 @@ const SearchResults = ({
     }
 
     const columns = [];
+    // Map table column id -> DB column name for server-side sorting
+    if (!generateColumnsFromConfig.colIdToDbName) {
+      generateColumnsFromConfig.colIdToDbName = {};
+    } else {
+      generateColumnsFromConfig.colIdToDbName = {};
+    }
 
     // Add edit column first
     columns.push({
@@ -279,6 +281,11 @@ const SearchResults = ({
     uniqueColumnConfig.forEach((col) => {
       const columnDef = createColumnFromConfig(col);
       if (columnDef) {
+        // Stash DB column name for sorting if available
+        if (col.dbName || col.DBColumnsNames) {
+          generateColumnsFromConfig.colIdToDbName[columnDef.id] = col.dbName || col.DBColumnsNames;
+        }
+        
         columns.push(columnDef);
       } else {
       }
@@ -1654,6 +1661,8 @@ const SearchResults = ({
   };
 
   const columns = getColumns();
+  // Provide a stable reference to column id->DB name map built during column generation
+  const colIdToDbName = (generateColumnsFromConfig.colIdToDbName || {});
 
   // Prepare stats data from OpportunityResult array
   const opportunityResult = data?.opportunityResult || {};
@@ -1696,38 +1705,6 @@ const SearchResults = ({
 
   return (
     <>
-      <style>{`
-        .search-results-scroll-container {
-          height: 100%;
-          overflow: auto !important;
-          position: relative;
-        }
-        
-        .search-results-scroll-container .enhanced-data-table {
-          overflow: visible !important;
-          height: auto !important;
-        }
-        
-        .search-results-scroll-container .enhanced-data-table > div {
-          overflow: visible !important;
-        }
-        
-        .search-results-scroll-container .overflow-x-auto {
-          overflow: visible !important;
-        }
-        
-        .search-results-scroll-container table {
-          width: 100% !important;
-        }
-        
-        /* Ensure table header stays visible during scroll */
-        .search-results-scroll-container thead {
-          position: sticky !important;
-          top: 0 !important;
-          z-index: 10 !important;
-          background-color: rgb(243, 244, 246) !important;
-        }
-      `}</style>
       <div className="h-screen bg-gray-50 flex flex-col">
         {/* Statistics Cards: hide in kanban and split views */}
         {viewMode !== "split" && viewMode !== "kanban" && (

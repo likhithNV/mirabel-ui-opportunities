@@ -1,30 +1,20 @@
 import { OpportunityFormData, ValidationErrors } from '../types/opportunity';
 import { opportunityService } from '../services/opportunityService';
+import { apiCache } from './apiCache';
 
-// Cache for required fields configuration
-let requiredFieldsCache: any = null;
-let cacheTimestamp: number = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-// Get required fields from API with caching
-const getRequiredFields = async (): Promise<any> => {
-  const now = Date.now();
-  
-  // Return cached data if still valid
-  if (requiredFieldsCache && (now - cacheTimestamp) < CACHE_DURATION) {
-    return requiredFieldsCache;
-  }
 
-  try {
-    const response = await opportunityService.getRequiredFields();
-    requiredFieldsCache = response?.content || response || {};
-    cacheTimestamp = now;
-    return requiredFieldsCache;
-  } catch (error) {
-    console.error('Failed to fetch required fields, using defaults:', error);
-    // Return default required fields if API fails
-    return getDefaultRequiredFields();
-  }
+// Get required fields from API with global caching
+export const getRequiredFields = async (): Promise<any> => {
+  return apiCache.get('requiredFields', async () => {
+    try {
+      const response = await opportunityService.getRequiredFields();
+      return response?.content?.List || response || {};
+    } catch (error) {
+      console.error('Failed to fetch required fields, using defaults:', error);
+      return getDefaultRequiredFields();
+    }
+  });
 };
 
 // Default required fields configuration (fallback)
@@ -46,16 +36,36 @@ const isFieldRequired = (fieldConfig: any, fieldName: string): boolean => {
   if (!fieldConfig) return false;
   
   // Check if field exists in API response and is marked as required
-  const field = fieldConfig[fieldName] || fieldConfig.find((f: any) => f.fieldName === fieldName || f.name === fieldName);
-  return field?.required === true || field?.isRequired === true;
+  // Handle both object format and array format
+  if (Array.isArray(fieldConfig)) {
+    const field = fieldConfig.find((f: any) => 
+      f.FeatureName?.toLowerCase() === fieldName.toLowerCase() ||
+      f.fieldName?.toLowerCase() === fieldName.toLowerCase() ||
+      f.name?.toLowerCase() === fieldName.toLowerCase()
+    );
+    return field?.IsRequired === 2 || field?.required === true || field?.isRequired === true;
+  } else {
+    const field = fieldConfig[fieldName];
+    return field?.IsRequired === 2 || field?.required === true || field?.isRequired === true;
+  }
 };
 
 // Get field validation rules from API configuration
 const getFieldRules = (fieldConfig: any, fieldName: string): any => {
   if (!fieldConfig) return {};
   
-  const field = fieldConfig[fieldName] || fieldConfig.find((f: any) => f.fieldName === fieldName || f.name === fieldName);
-  return field || {};
+  // Handle both object format and array format
+  if (Array.isArray(fieldConfig)) {
+    const field = fieldConfig.find((f: any) => 
+      f.FeatureName?.toLowerCase() === fieldName.toLowerCase() ||
+      f.fieldName?.toLowerCase() === fieldName.toLowerCase() ||
+      f.name?.toLowerCase() === fieldName.toLowerCase()
+    );
+    return field || {};
+  } else {
+    const field = fieldConfig[fieldName];
+    return field || {};
+  }
 };
 
 // Validation rules for opportunity form - now API-driven

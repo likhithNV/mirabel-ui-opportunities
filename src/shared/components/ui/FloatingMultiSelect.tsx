@@ -26,6 +26,7 @@ interface FloatingMultiSelectProps {
   maxSelections?: number
   searchable?: boolean
   showSelectedCount?: boolean
+  onDropdownVisibleChange?: (open: boolean) => void
 }
 
 export const FloatingMultiSelect: React.FC<FloatingMultiSelectProps> = ({
@@ -41,7 +42,8 @@ export const FloatingMultiSelect: React.FC<FloatingMultiSelectProps> = ({
   width = 'w-80',
   maxSelections,
   searchable = true,
-  showSelectedCount = true
+  showSelectedCount = true,
+  onDropdownVisibleChange
 }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [searchTerm, setSearchTerm] = React.useState('')
@@ -61,6 +63,17 @@ export const FloatingMultiSelect: React.FC<FloatingMultiSelectProps> = ({
   React.useEffect(() => {
     console.log('FloatingMultiSelect props:', { value, options: options.length, isOpen })
   }, [value, options, isOpen])
+
+  // Use ref to store the callback to prevent infinite loops
+  const onDropdownVisibleChangeRef = React.useRef(onDropdownVisibleChange)
+  onDropdownVisibleChangeRef.current = onDropdownVisibleChange
+
+  // Call onDropdownVisibleChange when dropdown state changes
+  React.useEffect(() => {
+    if (onDropdownVisibleChangeRef.current) {
+      onDropdownVisibleChangeRef.current(isOpen)
+    }
+  }, [isOpen])
 
   const selectedOptions = options.filter(option => value.includes(option.value))
   const hasSelections = selectedOptions.length > 0

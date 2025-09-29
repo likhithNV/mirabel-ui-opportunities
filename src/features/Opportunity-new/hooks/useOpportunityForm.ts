@@ -16,6 +16,7 @@ import {
   isValidProbabilityForStatus,
   isValidStageForStatus
 } from '../utils/validation';
+import { apiCache } from '../utils/apiCache';
 import { STAGE_PERCENTAGES, STAGE_NAMES, findStageIdByName } from '../constants/opportunityOptions';
 
 // Function to generate unique opportunity ID
@@ -114,18 +115,21 @@ export const useOpportunityForm = (opportunityId?: string) => {
   // Stage options for ID lookup
   const [stageOptions, setStageOptions] = useState<Array<{ id: string, name: string }>>([]);
 
-  // Load stages on mount
+  // Load stages on mount using global cache
   useEffect(() => {
     const loadStages = async () => {
       try {
-        const response = await opportunityService.getOpportunityStages();
-        if (response?.content?.List) {
-          const stages = response.content.List.map((stageData: any) => ({
-            id: stageData.ID,
-            name: stageData.Stage
-          }));
-          setStageOptions(stages);
-        }
+        const stages = await apiCache.get('stages', async () => {
+          const response = await opportunityService.getOpportunityStages();
+          if (response?.content?.List) {
+            return response.content.List.map((stageData: any) => ({
+              id: stageData.ID,
+              name: stageData.Stage
+            }));
+          }
+          return [];
+        });
+        setStageOptions(stages);
       } catch (error) {
         console.error('Failed to load stages:', error);
       }
@@ -451,11 +455,15 @@ export const useOpportunityForm = (opportunityId?: string) => {
 
     // Real-time validation if form has been submitted
     if (hasSubmitted) {
-      setTimeout(() => {
+      setTimeout(async () => {
         // Use the updated form data for validation
         setFormData(currentData => {
-          const errors = validateRequiredFields(currentData);
-          setValidationErrors(errors);
+          // Async validation - don't block the state update
+          validateRequiredFields(currentData).then(errors => {
+            setValidationErrors(errors);
+          }).catch(error => {
+            console.error('Real-time validation error:', error);
+          });
           return currentData;
         });
       }, 100);
@@ -539,10 +547,14 @@ export const useOpportunityForm = (opportunityId?: string) => {
 
     // Re-validate after batch update
     if (hasSubmitted) {
-      setTimeout(() => {
+      setTimeout(async () => {
         setFormData(currentData => {
-          const errors = validateRequiredFields(currentData);
-          setValidationErrors(errors);
+          // Async validation - don't block the state update
+          validateRequiredFields(currentData).then(errors => {
+            setValidationErrors(errors);
+          }).catch(error => {
+            console.error('Batch validation error:', error);
+          });
           return currentData;
         });
       }, 100);
@@ -555,20 +567,30 @@ export const useOpportunityForm = (opportunityId?: string) => {
 
   // Save opportunity
   const saveOpportunity = async (): Promise<boolean> => {
-   
+
 
     setHasSubmitted(true);
 
     // Validate form
-    const errors = validateRequiredFields(formData);
-    console.log('SaveOpportunity: Validation errors:', errors);
-    setValidationErrors(errors);
+    try {
+      const errors = await validateRequiredFields(formData);
+      console.log('SaveOpportunity: Validation errors:', errors);
+      setValidationErrors(errors);
 
-    if (Object.keys(errors).length > 0) {
-      console.log('SaveOpportunity: Validation failed, showing error toast');
+      if (Object.keys(errors).length > 0) {
+        console.log('SaveOpportunity: Validation failed, showing error toast');
+        toast({
+          title: 'Validation Error',
+          description: `Please fix the following errors: ${Object.values(errors).join(', ')}`,
+          variant: 'destructive'
+        });
+        return false;
+      }
+    } catch (validationError) {
+      console.error('Validation error:', validationError);
       toast({
         title: 'Validation Error',
-        description: `Please fix the following errors: ${Object.values(errors).join(', ')}`,
+        description: 'Failed to validate form. Please try again.',
         variant: 'destructive'
       });
       return false;
@@ -852,10 +874,14 @@ export const useOpportunityForm = (opportunityId?: string) => {
 
       // Re-validate if form has been submitted
       if (hasSubmitted) {
-        setTimeout(() => {
+        setTimeout(async () => {
           setFormData(currentData => {
-            const errors = validateRequiredFields(currentData);
-            setValidationErrors(errors);
+            // Async validation - don't block the state update
+            validateRequiredFields(currentData).then(errors => {
+              setValidationErrors(errors);
+            }).catch(error => {
+              console.error('Status confirm validation error:', error);
+            });
             return currentData;
           });
         }, 150);
