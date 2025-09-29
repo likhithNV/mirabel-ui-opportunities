@@ -201,7 +201,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
   // Generate columns from API ColumnConfig
   const generateColumnsFromConfig = (columnConfig) => {
     if (!columnConfig || !Array.isArray(columnConfig)) {
-      logger.info('SearchResults: No column config found, using default columns');
       return getDefaultColumns();
     }
 
@@ -389,26 +388,21 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     } else if (mappingPath === 'ProductDetails.Name') {
       columnType = 'product';
       renderId = 'product';
-      logger.info('SearchResults: FOUND Product column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'OppLossReasonDetails.Name') {
       columnType = 'lossReason';
       renderId = 'lossReason';
-      logger.info('SearchResults: FOUND Loss Reason column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'ProposalID') {
       columnType = 'proposalId';
       renderId = 'proposalId';
     } else if (mappingPath === 'ProspectingStage' || mappingPath === 'SubContactDetails.ProspectingStage' || mappingPath === 'ContactDetails.ProspectingStage') {
       columnType = 'prospectingStage';
       renderId = 'prospectingStage';
-      logger.info('SearchResults: FOUND Prospecting Stage column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'LeadSource' || mappingPath === 'SubContactDetails.LeadSource' || mappingPath === 'ContactDetails.LeadSource') {
       columnType = 'leadSource';
       renderId = 'leadSource';
-      logger.info('SearchResults: FOUND Lead Source column mapping!', { mappingPath, visibleColumns });
     } else if (mappingPath === 'LeadType' || mappingPath === 'SubContactDetails.LeadType' || mappingPath === 'ContactDetails.LeadType') {
       columnType = 'leadType';
       renderId = 'leadType';
-      logger.info('SearchResults: FOUND Lead Type column mapping!', { mappingPath, visibleColumns });
     } else {
       // Fallback to regex patterns and intelligent detection for other cases
       if (/(^|\.)status$/.test(pathLc)) {
@@ -714,7 +708,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                   stage={stage}
                   opportunityId={row.ID || row.id}
                   onStageChange={(opportunityId, newStage) => {
-                    logger.info(`Stage changed for opportunity ${opportunityId} to ${newStage}`);
                     // Trigger refresh to update the data
                     refetch?.();
                   }}
@@ -850,7 +843,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                   prospectingStage={prospectingStage}
                   opportunity={row}
                   onStageChange={(opportunityId, newStage) => {
-                    logger.info(`Prospecting stage changed for opportunity ${opportunityId} to ${newStage}`);
                     // Trigger refresh to update the data
                     refetch?.();
                   }}
@@ -918,7 +910,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                         refetch?.();
                       }
                     } catch (error) {
-                      logger.error("Failed to update lead source:", error);
                     }
                   }}
                   placeholder="Select lead sources"
@@ -984,7 +975,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                         refetch?.();
                       }
                     } catch (error) {
-                      logger.error("Failed to update lead type:", error);
                     }
                   }}
                   placeholder="Select lead types"
@@ -1325,7 +1315,6 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     const columnConfig = data?.apiColumnConfig || data?.ColumnConfig || data?.content?.Data?.ColumnConfig;
 
     if (columnConfig && Array.isArray(columnConfig) && columnConfig.length > 0) {
-      logger.info('SearchResults: Using API column configuration:', columnConfig);
       return generateColumnsFromConfig(columnConfig);
     }
 
