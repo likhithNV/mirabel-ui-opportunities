@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import CardViewNew from './CardViewNew';
 import { EnhancedDataTable } from '@/shared/components/ui/advanced-table';
 import { EnhancedFilterBar } from '@/components/ui/EnhancedFilterBar';
@@ -619,6 +619,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
       id: uniqueId,
       header: visibleColumns || propertyMappingName || dbName || 'Unknown',
       accessor: mappingPath,
+      dbName: dbName || '',
       sortable: true,
       width: getColumnWidth(columnType),
       columnType: columnType, // Add for debugging
@@ -1316,12 +1317,17 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     refetch();
   }
 
-  // Memoize columns so sort state persists and header icons update correctly
-  const activeColumnConfig = data?.apiColumnConfig || data?.ColumnConfig || data?.content?.Data?.ColumnConfig;
-  const columns = React.useMemo(() => {
-    if (activeColumnConfig && Array.isArray(activeColumnConfig) && activeColumnConfig.length > 0) {
-      return generateColumnsFromConfig(activeColumnConfig);
+  // Define columns for EnhancedDataTable - fully API-driven
+  const getColumns = () => {
+    // Check multiple possible locations for column config
+    const columnConfig = data?.apiColumnConfig || data?.ColumnConfig || data?.content?.Data?.ColumnConfig;
+
+    if (columnConfig && Array.isArray(columnConfig) && columnConfig.length > 0) {
+      return generateColumnsFromConfig(columnConfig);
     }
+
+    // If no API config, return minimal columns to avoid conflicts
+    
     return [
       {
         id: 'edit',
@@ -1339,7 +1345,9 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
               <Edit className="h-4 w-4 text-gray-600 hover:text-black" />
             </button>
           ) : (
-            <div className="h-8 w-8 flex items-center justify-center"></div>
+            <div className="h-8 w-8 flex items-center justify-center">
+              {/* Empty space to maintain alignment */}
+            </div>
           )
         )
       },
@@ -1372,10 +1380,107 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
         )
       }
     ];
-  }, [activeColumnConfig, masterDataLoaded, isOpportunities, searchType]);
+  };
 
-  // Stable map for DB column names used for SortBy construction
-  const colIdToDbName = React.useMemo(() => (generateColumnsFromConfig.colIdToDbName || {}), [columns]);
+  // Ensure config and cache are defined before memoization
+  const activeColumnConfig = data?.apiColumnConfig || data?.ColumnConfig || data?.content?.Data?.ColumnConfig;
+  const columnsCacheRef = useRef({ key: null, cols: null });
+  const columns = useMemo(() => {
+    // Create a compact signature of the server-provided config
+    const signature = (() => {
+      if (!Array.isArray(activeColumnConfig)) return 'no-config';
+      try {
+        return JSON.stringify(activeColumnConfig.map(c => ({
+          db: c.dbName || c.DBColumnsNames || '',
+          map: c.propertyMappingName || c.PropertyMappingName || '',
+          vis: c.visibleColumns || c.VisibleColumns || ''
+        })));
+      } catch {
+        return 'no-config';
+      }
+    })();
+
+    if (columnsCacheRef.current.key === signature && columnsCacheRef.current.cols) {
+      return columnsCacheRef.current.cols;
+    }
+
+    let built;
+    if (activeColumnConfig && Array.isArray(activeColumnConfig) && activeColumnConfig.length > 0) {
+      built = generateColumnsFromConfig(activeColumnConfig);
+    } else {
+      built = [
+        {
+          id: 'edit',
+          header: '',
+          accessor: () => null,
+          sortable: false,
+          width: 50,
+          render: (value, row) => (
+            shouldShowEdit(row) ? (
+              <button
+                onClick={(e) => handleEditClick(e, row)}
+                className="h-8 w-8 p-0 rounded hover:bg-gray-50 flex items-center justify-center"
+                title={`Edit ${isOpportunities ? 'Opportunity' : 'Proposal'}`}
+              >
+                <Edit className="h-4 w-4 text-gray-600 hover:text-black" />
+              </button>
+            ) : (
+              <div className="h-8 w-8 flex items-center justify-center"></div>
+            )
+          )
+        },
+        {
+          id: 'name',
+          header: 'Name',
+          accessor: 'Name',
+          sortable: true,
+          width: 200,
+          render: (value, row) => {
+            const displayName = value || row.Name || 'Untitled';
+            return (
+              <a href={`/${searchType}/${row.ID || row.id}`} className="text-blue-600 hover:text-blue-800 hover:underline font-medium flex items-center space-x-1">
+                <span>{displayName}</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            );
+          }
+        },
+        {
+          id: 'actions',
+          header: '',
+          accessor: () => null,
+          sortable: false,
+          width: 50,
+          render: () => (
+            <button className="p-1 hover:bg-gray-100 rounded">
+              <MoreVertical className="h-4 w-4 text-gray-400" />
+            </button>
+          )
+        }
+      ];
+    }
+
+    columnsCacheRef.current = { key: signature, cols: built };
+    return built;
+  }, [activeColumnConfig, isOpportunities, searchType]);
+
+  const colIdToDbName = useMemo(() => {
+    const mapFromConfig = generateColumnsFromConfig.colIdToDbName || {};
+    const map = { ...mapFromConfig };
+    // Fallback: derive from current columns if map is empty
+    if (Object.keys(map).length === 0 && Array.isArray(columns)) {
+      try {
+        columns.forEach(col => {
+          if (col && col.id && col.dbName) {
+            map[col.id] = col.dbName;
+          }
+        });
+      } catch {}
+    }
+    return map;
+  }, [columns]);
+
+  const lastSortRef = useRef({ columnId: null, direction: 'ASC' });
 
   // Prepare stats data from OpportunityResult array
   const opportunityResult = data?.opportunityResult || {};
@@ -1529,19 +1634,40 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                   
                 }}
                 onSort={(sortConfig) => {
-                  // Build server-side SortBy using provided directions exactly
+                  // Build server-side SortBy with forced toggle when same column is clicked again
                   if (!Array.isArray(sortConfig) || sortConfig.length === 0) {
                     setPage(1);
                     refetch({ ...buildQuickParams(), CurPage: 1, SortBy: undefined });
                     return;
                   }
+
                   const parts = [];
+                  const primary = sortConfig[0];
+
+                  // Force toggle when same column is clicked again
+                  if (primary?.columnId) {
+                    if (lastSortRef.current.columnId === primary.columnId) {
+                      // flip
+                      lastSortRef.current.direction = lastSortRef.current.direction === 'ASC' ? 'DESC' : 'ASC';
+                    } else {
+                      lastSortRef.current = { columnId: primary.columnId, direction: 'ASC' };
+                    }
+                  }
+
                   for (const s of sortConfig) {
                     const db = colIdToDbName[s.columnId];
                     if (!db) continue;
-                    const dir = (String(s.direction || '').toLowerCase() === 'desc' ? 'DESC' : 'ASC');
+                    // Use forced toggle for primary; for other columns, respect provided direction
+                    let dir;
+                    if (s.columnId === lastSortRef.current.columnId) {
+                      dir = lastSortRef.current.direction;
+                    } else {
+                      dir = String(s.direction || 'ASC').toUpperCase();
+                      if (dir !== 'ASC' && dir !== 'DESC') dir = 'ASC';
+                    }
                     parts.push(`[${db}] ${dir}`);
                   }
+
                   setPage(1);
                   const qp = buildQuickParams();
                   refetch({ ...qp, SortBy: parts.join(', '), CurPage: 1 });
