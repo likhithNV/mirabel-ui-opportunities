@@ -11,6 +11,7 @@ import ViewsSidebar from "@/shared/components/ui/views/ViewsSidebar";
 import { NewLoader } from "@/shared/components/ui/NewLoader";
 import KanbanView from "../kanban/KanbanView";
 import SplitScreenView from "../SplitScreenView/SplitScreenView";
+import ProposalSplitScreenView from "../SplitScreenView/ProposalSplitScreenView";
 import { opportunityService } from "../../services/opportunityService";
 import { userServiceNew } from "../../services/userServiceNew";
 import contactsApi from "@/services/contactsApi";
@@ -136,7 +137,7 @@ const SearchResults = ({
     e.stopPropagation();
     const id = row.ID || row.id;
     if (id) {
-        window.location.href = `/edit-opportunity-new/${id}`;
+      window.location.href = `/edit-opportunity-new/${id}`;
     }
   };
 
@@ -283,9 +284,10 @@ const SearchResults = ({
       if (columnDef) {
         // Stash DB column name for sorting if available
         if (col.dbName || col.DBColumnsNames) {
-          generateColumnsFromConfig.colIdToDbName[columnDef.id] = col.dbName || col.DBColumnsNames;
+          generateColumnsFromConfig.colIdToDbName[columnDef.id] =
+            col.dbName || col.DBColumnsNames;
         }
-        
+
         columns.push(columnDef);
       } else {
       }
@@ -1560,7 +1562,10 @@ const SearchResults = ({
     setSelectedOpportunity(opportunity);
 
     // Extract company information from opportunity - check multiple possible fields
+    // Note: The API response has contact details in Customer field, not ContactDetails
     const companyName =
+      opportunity?.Customer?.Name ||
+      opportunity?.Customer?.ContactFullName ||
       opportunity?.ContactDetails?.Name ||
       opportunity?.ContactDetails?.CompanyName ||
       opportunity?.CompanyName ||
@@ -1569,19 +1574,112 @@ const SearchResults = ({
       "Unknown Company";
 
     const companyData = {
-      id: opportunity?.ContactDetails?.ID || opportunity?.ID,
-      contactId: opportunity?.ContactDetails?.ID || opportunity?.ID,
+      id:
+        opportunity?.Customer?.ID ||
+        opportunity?.ContactDetails?.ID ||
+        opportunity?.ID,
+      contactId:
+        opportunity?.Customer?.ID ||
+        opportunity?.ContactDetails?.ID ||
+        opportunity?.ID,
       name: companyName,
-      firstName: opportunity?.ContactDetails?.FirstName || "",
-      lastName: opportunity?.ContactDetails?.LastName || "",
-      phone: opportunity?.ContactDetails?.Phone || "",
+      firstName:
+        opportunity?.Customer?.FirstName ||
+        opportunity?.ContactDetails?.FirstName ||
+        "",
+      lastName:
+        opportunity?.Customer?.LastName ||
+        opportunity?.ContactDetails?.LastName ||
+        "",
+      phone:
+        opportunity?.Customer?.Phone ||
+        opportunity?.ContactDetails?.Phone ||
+        "",
       mobile:
+        opportunity?.Customer?.CellPhone ||
         opportunity?.ContactDetails?.CellPhone ||
         opportunity?.ContactDetails?.Mobile ||
         "",
-      email: opportunity?.ContactDetails?.Email || "",
+      email:
+        opportunity?.Customer?.Email ||
+        opportunity?.ContactDetails?.Email ||
+        "",
+      ext:
+        opportunity?.Customer?.PhoneExt ||
+        opportunity?.ContactDetails?.PhoneExt ||
+        "",
+      contactName:
+        opportunity?.Customer?.ContactName ||
+        opportunity?.Customer?.ContactFullName ||
+        "",
+      ...opportunity?.Customer,
       ...opportunity?.ContactDetails,
     };
+
+    console.log("handleOpportunitySelect: Extracted company data:", {
+      opportunity,
+      companyName,
+      companyData,
+      customer: opportunity?.Customer,
+    });
+
+    handleCompanySelect(companyName, companyData);
+  };
+
+  const handleProposalSelect = (proposal) => {
+    setSelectedOpportunity(proposal);
+
+    // Extract company information from proposal - check multiple possible fields
+    // Note: The API response has contact details in Customer field, not ContactDetails
+    const companyName =
+      proposal?.Customer?.Name ||
+      proposal?.Customer?.ContactFullName ||
+      proposal?.ContactDetails?.Name ||
+      proposal?.ContactDetails?.CompanyName ||
+      proposal?.CompanyName ||
+      proposal?.Company ||
+      proposal?.CustomerName ||
+      "Unknown Company";
+
+    const companyData = {
+      id:
+        proposal?.Customer?.ID || proposal?.ContactDetails?.ID || proposal?.ID,
+      contactId:
+        proposal?.Customer?.ID || proposal?.ContactDetails?.ID || proposal?.ID,
+      name: companyName,
+      firstName:
+        proposal?.Customer?.FirstName ||
+        proposal?.ContactDetails?.FirstName ||
+        "",
+      lastName:
+        proposal?.Customer?.LastName ||
+        proposal?.ContactDetails?.LastName ||
+        "",
+      phone: proposal?.Customer?.Phone || proposal?.ContactDetails?.Phone || "",
+      mobile:
+        proposal?.Customer?.CellPhone ||
+        proposal?.ContactDetails?.CellPhone ||
+        proposal?.ContactDetails?.Mobile ||
+        "",
+      email: proposal?.Customer?.Email || proposal?.ContactDetails?.Email || "",
+      ext:
+        proposal?.Customer?.PhoneExt ||
+        proposal?.ContactDetails?.PhoneExt ||
+        "",
+      contactName:
+        proposal?.Customer?.ContactName ||
+        proposal?.Customer?.ContactFullName ||
+        "",
+      ...proposal?.Customer,
+      ...proposal?.ContactDetails,
+    };
+
+    console.log("handleProposalSelect: Extracted company data:", {
+      proposal,
+      companyName,
+      companyData,
+      customer: proposal?.Customer,
+    });
 
     handleCompanySelect(companyName, companyData);
   };
@@ -1662,7 +1760,7 @@ const SearchResults = ({
 
   const columns = getColumns();
   // Provide a stable reference to column id->DB name map built during column generation
-  const colIdToDbName = (generateColumnsFromConfig.colIdToDbName || {});
+  const colIdToDbName = generateColumnsFromConfig.colIdToDbName || {};
 
   // Prepare stats data from OpportunityResult array
   const opportunityResult = data?.opportunityResult || {};
@@ -1740,10 +1838,8 @@ const SearchResults = ({
               activeView={viewMode}
               onViewChange={setViewMode}
               onViewsClick={() => setIsViewsSidebarOpen(true)}
-              // Hide Kanban view for proposals, but allow split view for opportunities
-              hideViewIcons={
-                searchType === "proposals" ? ["kanban", "split"] : []
-              }
+              // Hide Kanban view for proposals, but allow split view for both opportunities and proposals
+              hideViewIcons={searchType === "proposals" ? ["kanban"] : []}
             />
           </div>
         </div>
@@ -1835,26 +1931,49 @@ const SearchResults = ({
         {/* Split Screen View */}
         {!loading && viewMode === "split" && (
           <div className="flex-1 min-h-0">
-            <SplitScreenView
-              selectedCompany={selectedCompany}
-              selectedCompanyData={selectedCompanyData}
-              opportunities={data?.results || []}
-              onCompanySelect={handleCompanySelect}
-              onCloseSidebar={handleCloseSidebar}
-            >
-              {/* Table Content */}
-              <div className="flex-1 min-h-0 overflow-hidden">
-                <EnhancedDataTable
-                  data={data?.results || []}
-                  columns={columns}
-                  loading={loading}
-                  error={error}
-                  onRowClick={handleOpportunitySelect}
-                  onBulkAction={(action, rows) => {}}
-                  onSort={(sortConfig) => {}}
-                />
-              </div>
-            </SplitScreenView>
+            {searchType === "proposals" ? (
+              <ProposalSplitScreenView
+                selectedCompany={selectedCompany}
+                selectedCompanyData={selectedCompanyData}
+                proposals={data?.results || []}
+                onCompanySelect={handleCompanySelect}
+                onCloseSidebar={handleCloseSidebar}
+              >
+                {/* Table Content */}
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <EnhancedDataTable
+                    data={data?.results || []}
+                    columns={columns}
+                    loading={loading}
+                    error={error}
+                    onRowClick={handleProposalSelect}
+                    onBulkAction={(action, rows) => {}}
+                    onSort={(sortConfig) => {}}
+                  />
+                </div>
+              </ProposalSplitScreenView>
+            ) : (
+              <SplitScreenView
+                selectedCompany={selectedCompany}
+                selectedCompanyData={selectedCompanyData}
+                opportunities={data?.results || []}
+                onCompanySelect={handleCompanySelect}
+                onCloseSidebar={handleCloseSidebar}
+              >
+                {/* Table Content */}
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <EnhancedDataTable
+                    data={data?.results || []}
+                    columns={columns}
+                    loading={loading}
+                    error={error}
+                    onRowClick={handleOpportunitySelect}
+                    onBulkAction={(action, rows) => {}}
+                    onSort={(sortConfig) => {}}
+                  />
+                </div>
+              </SplitScreenView>
+            )}
           </div>
         )}
       </div>

@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import CompanySidebarHeader from "./CompanySidebarHeader";
-import CompanyDetailsCard from "./CompanyDetailsCard";
-import ActivityTabs from "./ActivityTabs";
+import ProposalCompanySidebarHeader from "./ProposalCompanySidebarHeader";
+import ProposalCompanyDetailsCard from "./ProposalCompanyDetailsCard";
+import ProposalActivityTabs from "./ProposalActivityTabs";
 import { useCompanyData } from "../../../hooks/useCompanyData";
 import { useCompanySidebar } from "../../../hooks/useCompanySidebar";
 import { Building2, AlertCircle, RefreshCw } from "lucide-react";
@@ -11,15 +11,15 @@ import { Button } from "@/components/ui/button";
 import apiService from "../../../services/apiService";
 import { userService } from "../../../services/userService";
 
-const CompanySidebar = ({
+const ProposalCompanySidebar = ({
   selectedCompany,
   selectedCompanyData,
-  opportunities,
+  proposals,
   onClose,
 }) => {
-  console.log("CompanySidebar: Company data extraction:", {
+  console.log("ProposalCompanySidebar: Company data extraction:", {
     selectedCompany,
-    opportunities: opportunities?.length,
+    proposals: proposals?.length,
     selectedCompanyData,
     contactId:
       selectedCompanyData?.ID || selectedCompanyData?.ContactDetails?.ID,
@@ -70,7 +70,7 @@ const CompanySidebar = ({
     showToast,
     filterStates,
     handleFilterChange,
-  } = useCompanySidebar(selectedCompany, opportunities, editableCompanyData);
+  } = useCompanySidebar(selectedCompany, proposals, editableCompanyData);
 
   // Speech recognition state
   const [isListening, setIsListening] = useState(false);
@@ -129,6 +129,11 @@ const CompanySidebar = ({
     };
 
     return recognition;
+  };
+
+  // Fetch company details function for error retry
+  const fetchCompanyDetails = () => {
+    refreshAllTabsData();
   };
 
   // Handle microphone click
@@ -280,7 +285,7 @@ const CompanySidebar = ({
   if (loadingStates.company) {
     return (
       <div className="w-[420px] h-screen bg-gray-50 border-l border-gray-200 flex flex-col">
-        <CompanySidebarHeader
+        <ProposalCompanySidebarHeader
           onClose={onClose}
           loadingStates={loadingStates}
           editableCompanyData={editableCompanyData}
@@ -298,7 +303,7 @@ const CompanySidebar = ({
   if (errorStates.company) {
     return (
       <div className="w-[420px] h-screen bg-gray-50 border-l border-gray-200 flex flex-col">
-        <CompanySidebarHeader
+        <ProposalCompanySidebarHeader
           onClose={onClose}
           loadingStates={loadingStates}
           editableCompanyData={editableCompanyData}
@@ -314,7 +319,7 @@ const CompanySidebar = ({
             <div className="text-xs text-gray-500 mt-2">
               <p>Debug info:</p>
               <p>Company: {selectedCompany}</p>
-              <p>Opportunities: {opportunities?.length || 0} items</p>
+              <p>Proposals: {proposals?.length || 0} items</p>
             </div>
           </div>
         </div>
@@ -324,7 +329,7 @@ const CompanySidebar = ({
 
   return (
     <div className="w-[420px] h-screen bg-gray-50 border-l border-gray-200 flex flex-col">
-      <CompanySidebarHeader
+      <ProposalCompanySidebarHeader
         onClose={onClose}
         loadingStates={loadingStates}
         editableCompanyData={editableCompanyData}
@@ -336,7 +341,7 @@ const CompanySidebar = ({
         handleKeyDown={handleKeyDown}
       />
 
-      <CompanyDetailsCard
+      <ProposalCompanyDetailsCard
         editableCompanyData={editableCompanyData}
         editingField={editingField}
         tempValue={tempValue}
@@ -352,7 +357,7 @@ const CompanySidebar = ({
         handleKeyDown={handleKeyDown}
       />
 
-      <ActivityTabs
+      <ProposalActivityTabs
         activeTab={activeTab}
         handleTabChange={handleTabChange}
         tabData={tabData}
@@ -383,10 +388,10 @@ const CompanySidebar = ({
         getEmptyStateMessage={getEmptyStateMessage}
         onActivityUpdate={handleActivityUpdate}
         onShowToast={showToast}
-        opportunities={opportunities}
+        proposals={proposals}
       />
     </div>
   );
 };
 
-export default CompanySidebar;
+export default ProposalCompanySidebar;

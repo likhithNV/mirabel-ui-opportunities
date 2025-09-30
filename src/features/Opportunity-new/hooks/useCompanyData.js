@@ -31,6 +31,12 @@ export const useCompanyData = (selectedCompany, selectedCompanyData) => {
         enabled: !!contactId,
         staleTime: 5 * 60 * 1000, // 5 minutes
         cacheTime: 10 * 60 * 1000, // 10 minutes
+        onError: (error) => {
+            console.error('useCompanyData: API call failed:', error);
+        },
+        onSuccess: (data) => {
+            console.log('useCompanyData: API call successful:', data);
+        }
     });
 
     // State for company data - initialize with empty/null values
@@ -54,6 +60,13 @@ export const useCompanyData = (selectedCompany, selectedCompanyData) => {
         console.log('useCompanyData: selectedCompanyData:', selectedCompanyData);
         console.log('useCompanyData: contactId:', contactId);
         console.log('useCompanyData: apiCompanyData:', apiCompanyData);
+        console.log('useCompanyData: selectedCompanyData fields:', {
+            phone: selectedCompanyData?.phone,
+            mobile: selectedCompanyData?.mobile,
+            email: selectedCompanyData?.email,
+            firstName: selectedCompanyData?.firstName,
+            lastName: selectedCompanyData?.lastName
+        });
 
         if (apiCompanyData?.data?.content?.Data) {
             // Parse API response and update company data - only use API data
@@ -78,17 +91,26 @@ export const useCompanyData = (selectedCompany, selectedCompanyData) => {
                 employees: contactDetails.Employees || ""
             });
         } else if (selectedCompany) {
-            // Fallback: only update company name and any real data from selectedCompanyData
-            console.log('useCompanyData: Using only real data for company:', selectedCompany);
-            setCompanyData(prev => ({
-                ...prev,
+            // Fallback: use data from selectedCompanyData if available
+            console.log('useCompanyData: Using selectedCompanyData for company:', selectedCompany);
+            console.log('useCompanyData: selectedCompanyData:', selectedCompanyData);
+
+            const newCompanyData = {
                 name: selectedCompany,
-                // Only update with real data from selectedCompanyData if available
-                firstName: selectedCompanyData?.contactName?.split(' ')[0] || "",
-                lastName: selectedCompanyData?.contactName?.split(' ').slice(1).join(' ') || "",
+                firstName: selectedCompanyData?.firstName || selectedCompanyData?.contactName?.split(' ')[0] || "",
+                lastName: selectedCompanyData?.lastName || selectedCompanyData?.contactName?.split(' ').slice(1).join(' ') || "",
                 email: selectedCompanyData?.email || "",
                 phone: selectedCompanyData?.phone || "",
-            }));
+                mobile: selectedCompanyData?.mobile || "",
+                ext: selectedCompanyData?.ext || "",
+                address: selectedCompanyData?.address || "",
+                website: selectedCompanyData?.website || "",
+                industry: selectedCompanyData?.industry || "",
+                employees: selectedCompanyData?.employees || ""
+            };
+
+            console.log('useCompanyData: Setting company data from selectedCompanyData:', newCompanyData);
+            setCompanyData(newCompanyData);
         }
     }, [selectedCompany, selectedCompanyData, apiCompanyData, contactId]);
 
