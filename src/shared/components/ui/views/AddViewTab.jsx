@@ -41,7 +41,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAvailableColumns } from "@/features/Opportunity-new/hooks/useAvailableColumns";
-import apiService from "@/features/Opportunity-new/Services/apiService";
+import apiService from "@/features/Opportunity-new/services/apiService";
 import { proposalService } from "@/features/Opportunity-new/Services/proposalService.js";
 import { getCurrentUserId } from "@/utils/userUtils";
 import Loader from "@/shared/components/ui/loader";

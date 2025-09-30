@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import apiService from '@/features/Opportunity-new/Services/apiService';
+import apiService from '@/features/Opportunity-new/services/apiService';
 
 export const useAvailableColumns = (shouldUseApi = true, pageType = "opportunities") => {
   const [availableColumns, setAvailableColumns] = useState([]);
