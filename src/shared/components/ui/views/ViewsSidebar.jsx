@@ -14,7 +14,7 @@ import { UserId } from "@/features/Opportunity-new/constants/opportunityOptions"
 import { getCurrentUserId } from "@/utils/userUtils";
 
 import { mapApiColumnsToTableColumns } from "@/features/Opportunity-new/utils/columnMapping";
-import apiService from "@/features/Opportunity-new/Services/apiService";
+import apiService from "@/features/Opportunity-new/services/apiService";
 import Loader from "@/shared/components/ui/loader";
 
 const ViewsSidebar = ({

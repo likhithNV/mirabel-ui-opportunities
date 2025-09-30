@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import apiService from '@/features/Opportunity-new/Services/apiService';
-import reportsViewsService from '@/features/Opportunity-new/Services/ReportsViewsService';
+import apiService from '@/features/Opportunity-new/services/apiService';
+import reportsViewsService from '@/features/Opportunity-new/services/ReportsViewsService';
 
 export const useSavedViews = (refreshKey = 0, pageType = "opportunities") => {
   const [savedViews, setSavedViews] = React.useState([]);
