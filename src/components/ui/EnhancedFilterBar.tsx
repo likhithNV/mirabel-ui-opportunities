@@ -65,6 +65,7 @@ interface EnhancedFilterBarProps {
   onViewsClick?: () => void;
   onFilterClick?: () => void;
   onSettingsClick?: () => void;
+  onCreateOpportunity?: () => void;
   onSortPresetChange?: (preset: SortPreset | null) => void;
   activeSortPreset?: string | null;
   searchPlaceholder?: string;
@@ -95,6 +96,7 @@ export const EnhancedFilterBar: FC<EnhancedFilterBarProps> = ({
   onViewsClick,
   onFilterClick,
   onSettingsClick,
+  onCreateOpportunity,
   onSortPresetChange,
   activeSortPreset = null,
   searchPlaceholder = "Search...",
@@ -357,7 +359,7 @@ export const EnhancedFilterBar: FC<EnhancedFilterBarProps> = ({
               variant="outline"
               size="sm"
               className="h-9 w-9 p-0"
-              onClick={() => { }}
+              onClick={() => onCreateOpportunity && onCreateOpportunity()}
             >
               <Plus className="h-4 w-4" />
             </Button>

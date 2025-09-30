@@ -1533,6 +1533,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
               total={data?.totalCount || 0}
               page={page}
               setPage={setPage}
+              onCreateOpportunity={() => navigate('/add-opportunity-new')}
               // Search
               searchQuery={''}
               searchPlaceholder={`Search ${title.toLowerCase()}...`}
