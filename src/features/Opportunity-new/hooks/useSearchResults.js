@@ -26,10 +26,18 @@ export const useSearchResults = (searchParams, searchType = 'opportunities') => 
       
       logger.info(`useSearchResults: Using ${searchType} service`);
 
-      // If quick overrides (newParams) are provided, build default payload with overrides
+      // If quick overrides (newParams) are provided, merge into full API payload and execute search
       if (newParams && Object.keys(newParams).length > 0) {
-        logger.info('useSearchResults: Using quick filter overrides');
-        results = await service.getInitialData(newParams);
+        logger.info('useSearchResults: Using quick overrides merged into API payload');
+        const apiPayload = searchPayloadBuilder.buildPayload(params || {}, searchType);
+        // Merge overrides like SortBy, CurPage, ListID, etc.
+        Object.assign(apiPayload, newParams);
+        try {
+          await userServiceNew.saveSearch({ apiPayload });
+        } catch (e) {
+          logger.warn('useSearchResults: saveSearch failed (overrides path), continuing', e);
+        }
+        results = await service.executeSearch(apiPayload);
       } else if (!params || Object.keys(params).length === 0) {
         logger.info('useSearchResults: No search params, fetching initial data');
         results = await service.getInitialData(newParams);

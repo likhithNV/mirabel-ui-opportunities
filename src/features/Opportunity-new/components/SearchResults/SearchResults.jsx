@@ -1316,17 +1316,12 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
     refetch();
   }
 
-  // Define columns for EnhancedDataTable - fully API-driven
-  const getColumns = () => {
-    // Check multiple possible locations for column config
-    const columnConfig = data?.apiColumnConfig || data?.ColumnConfig || data?.content?.Data?.ColumnConfig;
-
-    if (columnConfig && Array.isArray(columnConfig) && columnConfig.length > 0) {
-      return generateColumnsFromConfig(columnConfig);
+  // Memoize columns so sort state persists and header icons update correctly
+  const activeColumnConfig = data?.apiColumnConfig || data?.ColumnConfig || data?.content?.Data?.ColumnConfig;
+  const columns = React.useMemo(() => {
+    if (activeColumnConfig && Array.isArray(activeColumnConfig) && activeColumnConfig.length > 0) {
+      return generateColumnsFromConfig(activeColumnConfig);
     }
-
-    // If no API config, return minimal columns to avoid conflicts
-    
     return [
       {
         id: 'edit',
@@ -1344,9 +1339,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
               <Edit className="h-4 w-4 text-gray-600 hover:text-black" />
             </button>
           ) : (
-            <div className="h-8 w-8 flex items-center justify-center">
-              {/* Empty space to maintain alignment */}
-            </div>
+            <div className="h-8 w-8 flex items-center justify-center"></div>
           )
         )
       },
@@ -1379,11 +1372,10 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
         )
       }
     ];
-  };
+  }, [activeColumnConfig, masterDataLoaded, isOpportunities, searchType]);
 
-  const columns = getColumns();
-  // Provide a stable reference to column id->DB name map built during column generation
-  const colIdToDbName = (generateColumnsFromConfig.colIdToDbName || {});
+  // Stable map for DB column names used for SortBy construction
+  const colIdToDbName = React.useMemo(() => (generateColumnsFromConfig.colIdToDbName || {}), [columns]);
 
   // Prepare stats data from OpportunityResult array
   const opportunityResult = data?.opportunityResult || {};
@@ -1547,7 +1539,7 @@ const SearchResults = ({ searchParams, setShowResults, searchType = 'opportuniti
                   for (const s of sortConfig) {
                     const db = colIdToDbName[s.columnId];
                     if (!db) continue;
-                    const dir = (s.direction === 'desc' ? 'DESC' : 'ASC');
+                    const dir = (String(s.direction || '').toLowerCase() === 'desc' ? 'DESC' : 'ASC');
                     parts.push(`[${db}] ${dir}`);
                   }
                   setPage(1);
